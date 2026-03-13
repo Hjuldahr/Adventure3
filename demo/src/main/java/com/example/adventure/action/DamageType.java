@@ -1,15 +1,15 @@
 package com.example.adventure.action;
 
-import java.util.EnumMap;
-
 public abstract class DamageType {
     public static enum DamageTypes {
-
+        PHYSICAL, ENCHANTED, SILVERED,
+        BURNING, POISONING, CORRODING, FREEZING, 
+        PSIONIC, RADIANCE, OBLIVIATING
     };
     public static enum DamageModifierCategories {
-        NORMAL, // x 1
-        RESISTANCE, // x 0.5
         IMMUNITY, // x 0
+        RESISTANCE, // x 0.5
+        NORMAL, // x 1
         WEAKNESS, // x1.5
         VULNERABILITY // x2
     };

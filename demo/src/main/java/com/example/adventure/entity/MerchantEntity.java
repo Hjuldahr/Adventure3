@@ -3,14 +3,9 @@ package com.example.adventure.entity;
 import com.example.adventure.currency.CoinPurse;
 import com.example.adventure.item.Inventory;
 
-public class PlayerEntity extends Entity
+public class MerchantEntity 
 {
-    private Inventory inventory;
+    private Inventory merchandise;
+    private Inventory buyback;
     private CoinPurse coinPurse;
-    
-    public PlayerEntity(
-        String name
-    ) {
-        super(name);
-    }
 }

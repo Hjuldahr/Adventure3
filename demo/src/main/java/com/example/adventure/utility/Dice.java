@@ -1,38 +1,54 @@
 package com.example.adventure.utility;
 
-import java.util.Random;
+import java.util.stream.IntStream;
 
-public abstract class Dice {
-    private static final Random rand = new Random();
+public record Dice(int count, int sides) {
+    public int roll() {
+        return IntStream.range(0, count)
+            .map(_ -> rollOnce())
+            .sum();
+    }
 
-    public static int dany(int sides) {
-        return rand.nextInt(1, sides + 1);
+    public int rollMax() {
+        return sides;
     }
-    public static int d4() {
-        return rand.nextInt(1, 5);
+
+    public static int roll(int count, int sides) {
+        return IntStream.range(0, count)
+            .map(_ -> rollOnce(sides))
+            .sum();
     }
-    public static int d6() {
-        return rand.nextInt(1, 7);
-    }
-    public static int d8() {
-        return rand.nextInt(1, 9);
-    }
-    public static int d10() {
-        return rand.nextInt(1, 11);
-    }
-    public static int d12() {
-        return rand.nextInt(1, 13);
-    }
+
     public static int d20() {
-        return rand.nextInt(1, 21);
+        return rollOnce(20);
     }
-    public static int d100() {
-        return rand.nextInt(1, 101);
+
+    public int rollAdvantage() {
+        return Math.max(rollOnce(), rollOnce());
     }
-    public static int advantage() {
-        return Math.max(d20(), d20());
+
+    public int rollDisadvantage() {
+        return Math.min(rollOnce(), rollOnce());
     }
-    public static int disadvantage() {
-        return Math.min(d20(), d20());
+
+    public int rollOnce() {
+        return RNG.randomInt(1, sides + 1);
+    }
+
+    public static int rollOnce(int sides) {
+        return RNG.randomInt(1, sides + 1);
+    }
+
+    public int rollDropLowest() {
+        return IntStream.generate(this::rollOnce)
+            .limit(count)
+            .sorted()
+            .skip(1) // Skips the smallest value
+            .sum();
+    }
+
+    @Override
+    public String toString() {
+        return count + "d" + sides;
     }
 }
