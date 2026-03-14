@@ -96,4 +96,9 @@ public class DicePool
         String op = flatModifier > 0 ? " + " : " - ";
         return diceString + op + Math.abs(flatModifier);
     }
+
+    public int rollMin() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'rollMin'");
+    }
 }

@@ -3,27 +3,30 @@ package com.example.adventure.entity;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.example.adventure.action.DamageType.*;
+import com.example.adventure.action.Action;
 import com.example.adventure.action.DamageType;
 import com.example.adventure.action.Effect;
 import com.example.adventure.action.Spell;
 import com.example.adventure.entity.AbilityScores.AbilityCategories;
 import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
+import com.example.adventure.utility.Success;
+import com.example.adventure.utility.Success.SuccessTypes;
 
 public abstract class Entity 
 {
-    public static enum RollTypes {
-        FUMBLE, FAILURE, SUCCESS, TRIUMPH
-    }
-    
     public String name;
     public Constrained hitpoints;
-    public Constrained magicpoints; //used by spells
-    public Constrained actionpoints; //used by manuevers
+    public Constrained spellpoints; //used by spells
+
+    public boolean hasAction = true;
+    public boolean hasBonusAction = true;
+    public boolean hasReaction = true;
 
     private EnumMap<DamageTypes,DamageModifierCategories> damageModifiers;
     
@@ -45,7 +48,7 @@ public abstract class Entity
 
         // TODO derive from ability scores
         hitpoints = new Constrained(0, 999);
-        magicpoints = new Constrained(0, 999);
+        spellpoints = new Constrained(0, 999);
     }
 
     public Entity(Entity other) {
@@ -55,29 +58,34 @@ public abstract class Entity
     }
 
     public void applyEffect(Effect effect) {
-        String effectName = effect.getName();
+        Effect previousEffect = appliedEffects.put(effect.getName(), effect);
 
-        if (appliedEffects.containsKey(effectName)) {
-            appliedEffects.get(effectName).removeEntity(this);
+        if (previousEffect != null) {
+            previousEffect.removeEntity(this);
         }
-
-        effect.addEntity(this);
-        appliedEffects.put(effectName, effect);
     }
 
-    public RollTypes saveCheck(int difficultyClass, AbilityCategories saveType) {
-        int raw = Dice.d20();
-        int result = raw + abilityScores.getModifier(saveType) + getSaveModifier(saveType);
+    public void removeEffect(String name) {
+        Effect previousEffect = appliedEffects.remove(name);
 
-        if (result >= difficultyClass + 10) return RollTypes.TRIUMPH;
-        if (result <= difficultyClass - 10) return RollTypes.FUMBLE;
-        return result >= difficultyClass ? RollTypes.SUCCESS : RollTypes.FAILURE;
+        if (previousEffect != null) {
+            previousEffect.removeEntity(this);
+        }
+    }
+
+    /**
+     * save proficiency bonus
+     * @param saveType
+     * @return 
+     */
+    public int getSaveModifier(AbilityCategories saveType) {
+        return saveProficiencies.contains(saveType) ? profiencyBonus : 0;
     }
 
     public boolean simpleSaveCheck(int difficultyClass, AbilityCategories saveType) {
         int raw = Dice.d20();
-        int result = raw + abilityScores.getModifier(saveType) + getSaveModifier(saveType);
-        return result >= difficultyClass;
+        int result = raw + getSaveModifier(saveType);
+        return Success.simpleEvaluateSuccess(difficultyClass, result);
     }
 
     public int getSpellCastingDC() {
@@ -91,10 +99,6 @@ public abstract class Entity
     public float getDamageModifier(DamageTypes damageType) {
         DamageModifierCategories category = damageModifiers.getOrDefault(damageType, DamageModifierCategories.NORMAL);
         return DamageType.lookupDamageModifier(category);
-    }
-
-    public int getSaveModifier(AbilityCategories saveType) {
-        return saveProficiencies.contains(saveType) ? profiencyBonus : 0;
     }
 
     public int getSpellCastingModifier() {
@@ -154,14 +158,17 @@ public abstract class Entity
             case PSIONIC -> AbilityCategories.INTELLECT;
             default -> AbilityCategories.FORTITUDE;
         };
-
-        RollTypes rollType = saveCheck(difficultyClass, concentrationType);
         
-        if (rollType == RollTypes.FAILURE || rollType == RollTypes.FUMBLE)
+        if (!simpleSaveCheck(difficultyClass, concentrationType))
             unsetConcentratedSpell();
     }
 
     public void startOfTurn() {
+        // reset actions
+        hasAction = true;
+        hasBonusAction = true;
+        hasReaction = true;
+
         //apply effects
     }
 
@@ -178,5 +185,45 @@ public abstract class Entity
             }
             return false;
         });
+    }
+
+    public void performAction(Action action, List<Entity> targets) {
+        boolean usesAction = action.getActionUsage();
+        boolean usesBonusAction = action.getBonusActionUsage();
+
+        // If it needs a Bonus Action but you have neither a BA nor a Full Action to sub in
+        if (usesBonusAction && !hasBonusAction && !hasAction) return;
+        // If it needs a Full Action but you are out
+        if (usesAction && !usesBonusAction && !hasAction) return;
+
+        boolean success = action.use(this, targets);
+
+        if (!success) return;
+
+        if (usesBonusAction && hasBonusAction) {
+            hasBonusAction = false;
+        } else if (usesAction && hasAction) {
+            hasAction = false;
+        }
+    }
+
+    public void performReaction(Action reaction, List<Entity> targets) {
+        boolean usesReaction = reaction.getReactionUsage();
+
+        if (usesReaction && !hasReaction) {
+            return;
+        }
+
+        boolean success = reaction.use(this, targets);
+        hasReaction = success ? false : hasReaction;
+    }
+
+    public int getAbilityModifier(AbilityCategories category) {
+        return abilityScores.getModifier(category);
+    }
+
+    public int getArmourClass() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getArmourClass'");
     }
 }

@@ -13,24 +13,29 @@ public class Effect {
     private String name;
     private Set<Entity> entities = new HashSet<>();
     private Map<Entity,Timer> clocks = new HashMap<>();
-    
-    public void addEntity(Entity target, int duration) {
-        this.entities.add(target);
-        this.clocks.put(target, new Timer(duration));
-    }
 
     public String getName() {
         return name;
     }
 
+    /**
+     * When entity is adding its own effect
+     * @param target
+     * @param duration measured in turns
+     */
+    public void addEntity(Entity target, int duration) {
+        this.entities.add(target);
+        this.clocks.put(target, new Timer(duration));
+    }
+    /**
+     * When entity is removing its own effect
+     * @param entity
+     */
     public void removeEntity(Entity entity) {
         this.entities.remove(entity);
     }
 
     public void removeAllEntities() {
-        for (Entity e : entities) {
-            e.removeEffectFromMap(this.name); // You'll need this method in Entity
-        }
         this.entities.clear();
         this.clocks.clear();
     }
