@@ -5,8 +5,7 @@ import com.example.adventure.item.Inventory;
 
 public abstract class NonPlayerEntity extends Entity
 {
-    private Inventory inventory;
-    private CoinPurse coinPurse;
+    private int armourClass;
     
     public NonPlayerEntity(
         String name
@@ -16,5 +15,9 @@ public abstract class NonPlayerEntity extends Entity
 
     public NonPlayerEntity(NonPlayerEntity other) {
         super(other);
+    }
+
+    public int getArmourClass() {
+        return armourClass;
     }
 }

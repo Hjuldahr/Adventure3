@@ -16,7 +16,6 @@ import com.example.adventure.entity.AbilityScores.AbilityCategories;
 import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.Success;
-import com.example.adventure.utility.Success.SuccessTypes;
 
 public abstract class Entity 
 {
@@ -35,7 +34,6 @@ public abstract class Entity
 
     private AbilityScores abilityScores;
     private AbilityCategories spellCastingAbilityCategory;
-    private int armourClass;
 
     private Spell concentratedSpell;
 
@@ -110,7 +108,7 @@ public abstract class Entity
     }
 
     public boolean hitCheck(int attackRoll) {
-        return attackRoll >= armourClass;
+        return attackRoll >= getArmourClass();
     }
 
     public int getProfiencyBonus() {
@@ -123,7 +121,7 @@ public abstract class Entity
 
     public void setConcentratedSpell(Spell spell) {
         // protection against manual setting
-        if (!spell.getRequiresConcentration()) return;
+        if (!spell.requiresConcentration()) return;
         
         if (concentratedSpell != null) {
             concentratedSpell.concentrationBroken();
@@ -222,8 +220,5 @@ public abstract class Entity
         return abilityScores.getModifier(category);
     }
 
-    public int getArmourClass() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getArmourClass'");
-    }
+    public abstract int getArmourClass();
 }

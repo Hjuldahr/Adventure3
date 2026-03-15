@@ -13,4 +13,9 @@ public class PlayerEntity extends Entity
     ) {
         super(name);
     }
+
+    @Override
+    public int getArmourClass() {
+        //
+    }
 }
