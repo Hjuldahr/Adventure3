@@ -33,7 +33,7 @@ public abstract class Entity
     private int profiencyBonus;
     private Set<AbilityCategories> saveProficiencies = new HashSet<>();
 
-    private AbilityScores abilityScores;
+    protected AbilityScores abilityScores;
     private AbilityCategories spellCastingAbilityCategory;
 
     private Spell concentratedSpell;
@@ -165,30 +165,6 @@ public abstract class Entity
             unsetConcentratedSpell();
     }
 
-    public void startOfTurn() {
-        // reset actions
-        hasAction = true;
-        hasBonusAction = true;
-        hasReaction = true;
-
-        //apply effects
-    }
-
-    public void endOfTurn() {
-        appliedEffects.values().removeIf(effect -> {
-            boolean isExpired = effect.decayDuration(this);
-            
-            if (isExpired) {
-                // If this was your active concentration, clear the slot
-                if (concentratedSpell != null && concentratedSpell.getEffect() == effect) {
-                    unsetConcentratedSpell();
-                }
-                return true;
-            }
-            return false;
-        });
-    }
-
     public void performAction(Action action, List<Entity> targets) {
         boolean usesAction = action.getActionUsage();
         boolean usesBonusAction = action.getBonusActionUsage();
@@ -226,12 +202,38 @@ public abstract class Entity
 
     public abstract int getArmourClass();
 
+    public abstract boolean isDead();
+
     public void turn() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'turn'");
+        
+
+
+
     }
 
-    public abstract boolean isDead();
+    public void startOfTurn() {
+        // reset actions
+        hasAction = true;
+        hasBonusAction = true;
+        hasReaction = true;
+
+        //apply effects
+    }
+
+    public void endOfTurn() {
+        appliedEffects.values().removeIf(effect -> {
+            boolean isExpired = effect.decayDuration(this);
+            
+            if (isExpired) {
+                // If this was your active concentration, clear the slot
+                if (concentratedSpell != null && concentratedSpell.getEffect() == effect) {
+                    unsetConcentratedSpell();
+                }
+                return true;
+            }
+            return false;
+        });
+    }
 
     public void startOfRound() {
 
