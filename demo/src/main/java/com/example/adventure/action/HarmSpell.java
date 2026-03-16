@@ -1,7 +1,7 @@
 package com.example.adventure.action;
 
-import com.example.adventure.action.DamageType.DamageTypes;
 import com.example.adventure.entity.AbilityScores.AbilityCategories;
+import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.entity.Entity;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.DicePool;

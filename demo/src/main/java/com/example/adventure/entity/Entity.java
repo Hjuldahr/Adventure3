@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.example.adventure.action.DamageType.*;
 import com.example.adventure.action.Action;
-import com.example.adventure.action.DamageType;
 import com.example.adventure.action.Effect;
 import com.example.adventure.action.Spell;
+import com.example.adventure.combat.DamageTypeHelper;
+import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
+import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.entity.AbilityScores.AbilityCategories;
 import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
@@ -38,6 +39,9 @@ public abstract class Entity
     private Spell concentratedSpell;
 
     private Map<String,Effect> appliedEffects = new HashMap<>();
+
+    private AllegianceCategories allegiance;
+    private boolean hasSurrendered;
 
     public Entity(
         String name
@@ -96,7 +100,7 @@ public abstract class Entity
 
     public float getDamageModifier(DamageTypes damageType) {
         DamageModifierCategories category = damageModifiers.getOrDefault(damageType, DamageModifierCategories.NORMAL);
-        return DamageType.lookupDamageModifier(category);
+        return DamageTypeHelper.lookupDamageModifier(category);
     }
 
     public int getSpellCastingModifier() {
@@ -221,4 +225,74 @@ public abstract class Entity
     }
 
     public abstract int getArmourClass();
+
+    public void turn() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'turn'");
+    }
+
+    public abstract boolean isDead();
+
+    public void startOfRound() {
+
+    }
+
+    public void endOfRound() {
+
+    }
+
+    public void startOfEncounter() {
+
+    }
+
+    public void endOfEncounter() {
+
+    }
+
+    public boolean hasMultiInitiative() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getHasMultiInitiative'");
+    }
+
+    public int getAbilityScore(AbilityCategories category) {
+        return abilityScores.getAbilityScore(category);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getInitiativeModifier() {
+        // TODO add other bonuses
+        return abilityScores.getModifier(AbilityCategories.AGILITY);
+    }
+
+    public boolean hasInitiativeAdvantage() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public AllegianceCategories getAllegiance() {
+        return allegiance;
+    }
+
+    // should be automatically deleted on being killed
+    public boolean getPersistOnDeath() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isDefeated() {
+        if (hasSurrendered) return true; // gave up
+        if (hitpoints.atMinimum()) return true; // 0 hitpoints
+        return hitpoints.getRatio() <= 0.01f && hasFatalCondition(); // if at under 1% HP and has a disabling effect (functionally on deaths door)
+    }
+
+    public boolean hasFatalCondition() {
+        return appliedEffects.containsKey("Incapacitated") 
+            || appliedEffects.containsKey("Petrified") 
+            || appliedEffects.containsKey("Unconscious")
+            || appliedEffects.containsKey("Paralyzed") // Can't move/react
+            || appliedEffects.containsKey("Stunned");   // Can't move/react
+    }
 }

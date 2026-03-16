@@ -1,11 +1,6 @@
-package com.example.adventure.action;
+package com.example.adventure.combat;
 
-public abstract class DamageType {
-    public static enum DamageTypes {
-        PHYSICAL, ENCHANTED, SILVERED,
-        BURNING, POISONING, CORRODING, FREEZING, 
-        PSIONIC, RADIANCE, OBLIVIATING
-    };
+public abstract class DamageTypeHelper {
     public static enum DamageModifierCategories {
         IMMUNITY, // x 0
         RESISTANCE, // x 0.5
