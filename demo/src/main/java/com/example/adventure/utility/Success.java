@@ -17,7 +17,7 @@ public abstract class Success {
     public static SuccessTypes evaluateSuccess(int result, int difficultyClass) {
         if (result >= difficultyClass + 10) return SuccessTypes.CRIT_SUCCESS;
         if (result >= difficultyClass) return SuccessTypes.SUCCESS;
-        if (result <= difficultyClass - 10) return SuccessTypes.CRIT_FAILURE;
+        if (result < difficultyClass - 10) return SuccessTypes.CRIT_FAILURE;
         return SuccessTypes.FAILURE;
     }
 

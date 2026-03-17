@@ -6,5 +6,10 @@ public class Item {
     public int buyCost;
     public int sellCost;
 
+    public boolean getRequiresTwoHands() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getRequiresTwoHands'");
+    }
+
     
 }

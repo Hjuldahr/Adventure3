@@ -202,8 +202,6 @@ public abstract class Entity
 
     public abstract int getArmourClass();
 
-    public abstract boolean isDead();
-
     public void turn() {
         
 

@@ -1,6 +1,5 @@
 package com.example.adventure.item;
 
-import java.util.HashSet;
 import java.util.List;
 
 public class Armoury {
@@ -54,12 +53,12 @@ public class Armoury {
     }
 
     public void equipShield(Shield shield) {
-        if (equippedOffWeapon.isTwoHandedOnly()) {
+        if (equippedOffWeapon.isTwoHandedOnly() || equippedOffWeapon.isVersatile()) {
             unequipOffWeapon();
-            equippedWeapon = weapon;
+            equippedOffWeapon = null;
         }
         unequipOffWeapon();
-        equippedOffWeapon = weapon;
+        equippedOffWeapon = null;
     }
 
     public void unequipWeapon() {

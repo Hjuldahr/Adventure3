@@ -1,6 +1,6 @@
 package com.example.adventure.action;
 
-import com.example.adventure.action.DamageType.DamageTypes;
+import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.entity.Entity;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.DicePool;
@@ -27,8 +27,9 @@ public class AttackSpell extends Spell {
             return;
         }
 
-        int damage = rollAttackDamage(luck);
+        int damage = rollAttackDamage(luck); 
 
+        // double damage dice on >= AC + 10
         if (success == SuccessTypes.CRIT_SUCCESS) {
             damage += rollAttackDamage(luck);
         }
@@ -39,10 +40,9 @@ public class AttackSpell extends Spell {
     }
 
     private int rollAttackDamage(LuckTypes luck) {
-
         return switch (luck) {
-            case TRIUMPH -> dicePool.rollMax();
-            case FUMBLE -> dicePool.rollMin();
+            case TRIUMPH -> dicePool.rollMax(); // Nat 20
+            case FUMBLE -> dicePool.rollMin(); // Nat 1
             default -> dicePool.rollAll();
         };
     }
