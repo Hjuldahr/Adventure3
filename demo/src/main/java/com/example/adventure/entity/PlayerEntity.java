@@ -5,6 +5,7 @@ import com.example.adventure.entity.AbilityScores.AbilityCategories;
 import com.example.adventure.item.Armoury;
 import com.example.adventure.item.Inventory;
 import com.example.adventure.item.Item;
+import com.example.adventure.item.Weapon;
 
 public class PlayerEntity extends Entity
 {
@@ -37,6 +38,37 @@ public class PlayerEntity extends Entity
         return inventory;
     }
 
+    public void viewInventory() {
+        // Check if hands are empty first
+        if (mainHand == null && offHand == null) {
+            System.out.println("Your hands are empty.");
+        }
+        // Handle two-handed items
+        else if (mainHand != null && offHand == null && mainHand.getUsesBothHands()) {
+            System.out.printf("You are %s a %s with both-hands.\n", mainHand.getVerb(), mainHand.getName());
+        }
+        // Handle dual-wielding (both hands full)
+        else if (mainHand != null && offHand != null) {
+            // Special case: Identical items (e.g., two "Iron Daggers")
+            if (mainHand.getName().equals(offHand.getName())) {
+                System.out.printf("You are dual-wielding %ss.\n", mainHand.getName());
+            } 
+            else {
+                System.out.printf("You are %s a %s and %s a %s.\n", 
+                    mainHand.getVerb(), mainHand.getName(), offHand.getVerb(), offHand.getName());
+            }
+        } 
+        // Single hand cases
+        else if (mainHand != null) {
+            System.out.printf("You are %s a %s with your main-hand.\n", mainHand.getVerb(), mainHand.getName());
+        } 
+        else {
+            System.out.printf("You are %s a %s with your off-hand.\n", offHand.getVerb(), offHand.getName());
+        }
+
+        inventory.viewInventory();
+    }
+
     // Holding Logic
     // Returns item incase you are dropping or trading instead of stowing / weapon swapping
 
@@ -46,89 +78,68 @@ public class PlayerEntity extends Entity
     public Item getOffhand() {
         return offHand;
     }
-    public void setMainHand(Item newItem) {
-        // 1. If we are currently holding a 2H item, it occupies both hands. 
-        //    Move it to inventory and clear both slots.
-        if (mainHand != null && mainHand.getRequiresTwoHands()) {
-            inventory.add(mainHand);
-            mainHand = null;
+    public void holdItem(Item newItem) {
+        if (newItem == null) return;
+
+        // 1. HEAVY: Occupies both hands physically.
+        if (newItem.requiresBoth()) {
+            stowItem(mainHand);
+            stowItem(offHand);
+            mainHand = newItem;
             offHand = null;
+            return;
         }
 
-        // 2. If the NEW item is 2H, we must also clear whatever is in the off-hand.
-        if (newItem != null && newItem.getRequiresTwoHands()) {
-            if (offHand != null) {
-                inventory.add(offHand);
+        // 2. SHIELD: Strictly off-hand.
+        if (newItem.canOff() && !newItem.canMain()) {
+            // If holding a Heavy weapon, it must be stowed.
+            if (mainHand != null && mainHand.requiresBoth()) {
+                stowItem(mainHand);
+                mainHand = null;
             }
-            mainHand = newItem;
+            stowItem(offHand);
             offHand = newItem;
-        } 
-        // 3. If the NEW item is 1H, push the old main-hand item to the off-hand.
-        //    BUT, we must save the old off-hand item first!
-        else {
-            if (offHand != null) {
-                inventory.add(offHand); // Save the shield/off-hand item
-            }
-            offHand = mainHand; // Move old sword to off-hand
-            mainHand = newItem; // Put new dagger in main-hand
-        }
-    }
-    public void setOffHand(Item newItem) {
-        // 1. If currently two-handing, the whole weapon goes to inventory
-        if (offHand != null && offHand.getRequiresTwoHands()) {
-            inventory.add(offHand);
-            mainHand = null;
-            offHand = null;
+            return;
         }
 
-        // 2. If the NEW item is two-handed, it takes over both slots
-        if (newItem != null && newItem.getRequiresTwoHands()) {
-            if (mainHand != null) inventory.add(mainHand);
-            // (Note: if offHand was different from mainHand, it was already cleared in step 1)
-            mainHand = newItem;
-            offHand = newItem;
-        } 
-        // 3. New item is one-handed
-        else {
-            // If mainHand is already taken, the "pushed" item goes to inventory
-            if (mainHand != null && offHand != null) {
-                inventory.add(mainHand);
+        // 3. MAIN-HAND CAPABLE (Light, Other, Versatile)
+        if (newItem.canMain()) {
+            if (mainHand != null) {
+                // SHIFT: Only Light/Other (canOff) can move to the off-hand.
+                // Versatile (canMain but !canOff) will be stowed instead.
+                if (offHand == null && mainHand.canOff()) {
+                    offHand = mainHand;
+                } else {
+                    stowItem(mainHand);
+                }
             }
-            
-            // Push current offHand to mainHand, then set the new item
-            mainHand = offHand; 
-            offHand = newItem;
+            mainHand = newItem;
         }
     }
-    public Item unsetMainHand() {
-        Item previous = mainHand;
-        if (mainHand != null && mainHand.getRequiresTwoHands()) {
-            offHand = null; // Clear both slots for 2H
+
+    public boolean isTwoHanding() {
+        if (mainHand == null) return false;
+        // Heavy forces two hands. Versatile uses both ONLY if off-hand is empty.
+        return mainHand.requiresBoth() || (mainHand.isVersatile() && offHand == null);
+    }
+
+    public boolean canCastSpell() {
+        // Rule: Requires at least one hand free.
+        // 1. If either hand is physically empty, you can cast.
+        if (mainHand == null || offHand == null) {
+            // Exception: Heavy weapons physically occupy both hands even if offHand is null.
+            if (mainHand != null && mainHand.requiresBoth()) return false;
+            // Versatile weapons are assumed to swap stances, so having no item 
+            // in offHand counts as a free hand for casting.
+            return true; 
         }
-        mainHand = null;
-        return previous;
+        // 2. If both hands have items (e.g., Sword + Shield or Dual Wielding), no hand is free.
+        return false;
     }
-    public Item unsetOffHand() {
-        Item previous = offHand;
-        if (offHand != null && offHand.getRequiresTwoHands()) {
-            mainHand = null; // Clear both slots for 2H
+
+    private void stowItem(Item item) {
+        if (item != null) {
+            inventory.add(item);
         }
-        offHand = null;
-        return previous;
-    }
-    public void swapHands() {
-        // if main hand is occupied but offhand is empty, dont swap
-        // if both hands are empty or holding the same thing, dont swap
-        if (offHand == null || mainHand == offHand) return;
-        
-        Item currentItem = mainHand;
-        mainHand = offHand;
-        offHand = currentItem;
-    }
-    public boolean hasHandFree() {
-        return mainHand == null || offHand == null;
-    }
-    public boolean hasBothHandsFree() {
-        return mainHand == null && offHand == null;
     }
 }

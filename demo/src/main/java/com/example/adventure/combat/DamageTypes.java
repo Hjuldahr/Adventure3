@@ -1,7 +1,8 @@
 package com.example.adventure.combat;
 
+// thunder is reclassified as physical as wind is a pushing force
 public enum DamageTypes {
     PHYSICAL, ENCHANTED, SILVERED,
-    BURNING, POISONING, CORRODING, FREEZING, 
-    PSIONIC, RADIANCE, OBLIVIATING
+    FLAME, POISON, CORRODING, FROST, FULMINOUS, 
+    PSIONIC, REFULGENT, OBLIVIATING
 };

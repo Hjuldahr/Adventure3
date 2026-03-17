@@ -120,7 +120,7 @@ public class CombatEncounter
         combatant.endOfTurn();
 
         // check against end of turn DoT damage
-        if (combatant.isDead() && !combatant.getPersistOnDeath()) {
+        if (combatant.isDefeated() && !combatant.getPersistOnDeath()) {
             combatOrder.remove(combatant);
         }
     }

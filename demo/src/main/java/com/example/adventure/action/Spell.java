@@ -1,5 +1,6 @@
 package com.example.adventure.action;
 
+import com.example.adventure.combat.Effect;
 import com.example.adventure.entity.Entity;
 import java.util.List;
 
@@ -31,6 +32,9 @@ public abstract class Spell {
     protected Effect effect;
 
     protected boolean requiresConcentration;
+
+    protected boolean noDamageOnSave;
+    protected boolean noEffectOnSave;
 
     public String getName() {
         return name;
@@ -82,7 +86,12 @@ public abstract class Spell {
 
     public void concentrationBroken() {
         if (effect != null && requiresConcentration) {
-            effect.removeAllEntities();
+            //effect.removeAllEntities();
         }
+    }
+
+    public void notifyEffectEnded(Effect effect2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'notifyEffectEnded'");
     }
 }

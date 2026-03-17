@@ -7,4 +7,9 @@ public class Inventory {
         throw new UnsupportedOperationException("Unimplemented method 'add'");
     }
 
+    public void viewInventory() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'viewInventory'");
+    }
+
 }

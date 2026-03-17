@@ -16,12 +16,8 @@ public class AreaDamageSpell extends Spell {
 
     private AbilityCategories saveType;
 
-    private boolean effectOnSave;
-    private boolean noDamageOnSave;
-
     @Override
     protected void applyToTarget(Entity caster, Entity target) {
-
         int dc = caster.getSpellSaveDifficulty();
 
         int raw = Dice.d20();
@@ -37,7 +33,7 @@ public class AreaDamageSpell extends Spell {
 
         target.applyDamage(damage, damageType);
 
-        if (effectOnSave && effect != null &&
+        if (effect != null &&
                 (success == SuccessTypes.FAILURE ||
                  success == SuccessTypes.CRIT_FAILURE)) {
 
@@ -50,13 +46,13 @@ public class AreaDamageSpell extends Spell {
         }
 
         return switch (luck) {
-            case TRIUMPH -> 0f;
-            case FUMBLE  -> 2f;
+            case TRIUMPH -> 0f; // nat 20
+            case FUMBLE  -> 2f; // nat 1
             default -> switch (success) {
-                case CRIT_SUCCESS -> 0.25f;
-                case SUCCESS      -> 0.5f;
-                case FAILURE      -> 1f;
-                case CRIT_FAILURE -> 1.5f;
+                case CRIT_SUCCESS -> 0.25f; // >= dc+10
+                case SUCCESS      -> 0.5f; // >= dc
+                case FAILURE      -> 1f; // < dc
+                case CRIT_FAILURE -> 1.5f; // < dc-10
                 default           -> 1f;
             };
         };

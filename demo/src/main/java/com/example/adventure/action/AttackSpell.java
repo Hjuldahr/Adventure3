@@ -13,31 +13,31 @@ public class AttackSpell extends Spell {
     private DicePool dicePool;
     private DamageTypes damageType;
 
+    // Ray of Frost style effect
     @Override
     protected void applyToTarget(Entity caster, Entity target) {
-        int raw = Dice.d20();
-        int result = raw + caster.getSpellCastingModifier() + caster.getProfiencyBonus();
+        int casterRaw = Dice.d20();
+        int casterResult = casterRaw + caster.getSpellCastingModifier() + caster.getProfiencyBonus();
 
-        int armourClass = target.getArmourClass();
+        int targetArmourClass = target.getArmourClass();
 
-        SuccessTypes success = Success.evaluateSuccess(result, armourClass);
-        LuckTypes luck = Success.evaluateLuck(raw);
+        SuccessTypes casterSuccess = Success.evaluateSuccess(casterResult, targetArmourClass);
+        LuckTypes casterLuck = Success.evaluateLuck(casterRaw);
 
-        if (success == SuccessTypes.FAILURE || success == SuccessTypes.CRIT_FAILURE) {
+        if (casterSuccess == SuccessTypes.FAILURE || casterSuccess == SuccessTypes.CRIT_FAILURE) {
             return;
         }
 
-        int damage = rollAttackDamage(luck); 
+        int damage = rollAttackDamage(casterLuck); 
 
         // double damage dice on >= AC + 10
-        if (success == SuccessTypes.CRIT_SUCCESS) {
-            damage += rollAttackDamage(luck);
+        if (casterSuccess == SuccessTypes.CRIT_SUCCESS) {
+            damage += rollAttackDamage(casterLuck);
         }
 
         target.applyDamage(damage, damageType);
-
         applyEffect(target);
-    }
+    }   
 
     private int rollAttackDamage(LuckTypes luck) {
         return switch (luck) {

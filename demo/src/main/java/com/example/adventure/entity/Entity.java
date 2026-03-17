@@ -8,11 +8,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.example.adventure.action.Action;
-import com.example.adventure.action.Effect;
 import com.example.adventure.action.Spell;
+import com.example.adventure.combat.Condition;
 import com.example.adventure.combat.DamageTypeHelper;
 import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
 import com.example.adventure.combat.DamageTypes;
+import com.example.adventure.combat.Effect;
 import com.example.adventure.entity.AbilityScores.AbilityCategories;
 import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
@@ -20,6 +21,8 @@ import com.example.adventure.utility.Success;
 
 public abstract class Entity 
 {
+    private static final Set<String> FATAL_TYPES = Set.of("Incapacitated", "Petrified", "Unconscious", "Paralyzed", "Stunned")
+    
     public String name;
     public Constrained hitpoints;
     public Constrained spellpoints; //used by spells
@@ -38,7 +41,8 @@ public abstract class Entity
 
     private Spell concentratedSpell;
 
-    private Map<String,Effect> appliedEffects = new HashMap<>();
+    private Set<Condition> activeConditions;
+    private Set<Effect> activeEffects;
 
     private AllegianceCategories allegiance;
     private boolean hasSurrendered;
@@ -57,22 +61,6 @@ public abstract class Entity
         this(
             other.name
         );
-    }
-
-    public void applyEffect(Effect effect) {
-        Effect previousEffect = appliedEffects.put(effect.getName(), effect);
-
-        if (previousEffect != null) {
-            previousEffect.removeEntity(this);
-        }
-    }
-
-    public void removeEffect(String name) {
-        Effect previousEffect = appliedEffects.remove(name);
-
-        if (previousEffect != null) {
-            previousEffect.removeEntity(this);
-        }
     }
 
     /**
@@ -155,7 +143,7 @@ public abstract class Entity
         int difficultyClass = Math.max(10, Math.floorDiv(damage, 2));
 
         AbilityCategories concentrationType = switch(damageType) {
-            case RADIANCE -> AbilityCategories.SPIRIT;
+            case REFULGENT -> AbilityCategories.SPIRIT;
             case OBLIVIATING -> AbilityCategories.SPIRIT;
             case PSIONIC -> AbilityCategories.INTELLECT;
             default -> AbilityCategories.FORTITUDE;
@@ -289,10 +277,25 @@ public abstract class Entity
     }
 
     public boolean hasFatalCondition() {
-        return appliedEffects.containsKey("Incapacitated") 
-            || appliedEffects.containsKey("Petrified") 
-            || appliedEffects.containsKey("Unconscious")
-            || appliedEffects.containsKey("Paralyzed") // Can't move/react
-            || appliedEffects.containsKey("Stunned");   // Can't move/react
+        return activeConditions.stream()
+            .anyMatch(e -> FATAL_TYPES.contains(e.getName()));
+    }
+    
+    public void applyEffect(Effect effect) {
+        this.activeEffects.add(effect);
+
+        this.activeConditions.add(effect.condition());
+        this.activeConditions.addAll(effect.condition().getDependantConditions());
+    }
+
+    public void removeEffect(Effect effect) {
+        if (!this.activeEffects.remove(effect)) return; 
+        
+        this.activeConditions.clear(); 
+
+        for (Effect e : activeEffects) {
+            this.activeConditions.add(e.condition());
+            this.activeConditions.addAll(e.condition().getDependantConditions());
+        }
     }
 }
