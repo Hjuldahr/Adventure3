@@ -38,6 +38,8 @@ public abstract class Spell {
     protected boolean recurringSave;
     protected AbilityCategories saveType;
 
+    //upcasting
+
     public String getName() {
         return name;
     }
