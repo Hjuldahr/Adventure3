@@ -13,7 +13,7 @@ import com.example.adventure.combat.Condition;
 import com.example.adventure.combat.DamageTypeHelper;
 import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
 import com.example.adventure.combat.DamageTypes;
-import com.example.adventure.combat.Effect;
+import com.example.adventure.combat.SpellEffect;
 import com.example.adventure.entity.AbilityScores.AbilityCategories;
 import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
@@ -39,13 +39,15 @@ public abstract class Entity
     protected AbilityScores abilityScores;
     private AbilityCategories spellCastingAbilityCategory;
 
-    private Spell concentratedSpell;
+    private SpellEffect concentrationEffect; 
 
     private Set<Condition> activeConditions;
-    private Set<Effect> activeEffects;
+    private Set<SpellEffect> activeSpellEffects;
 
     private AllegianceCategories allegiance;
     private boolean hasSurrendered;
+    private int initiativeCount = 1;
+    private boolean hasInitiativeAdvantage;
 
     public Entity(
         String name
@@ -107,22 +109,34 @@ public abstract class Entity
         return profiencyBonus;
     }
 
-    public Spell getConcentratedSpell() {
-        return concentratedSpell;
+    public void setConcentration(SpellEffect effect) {
+        breakConcentration();
+        this.concentrationEffect = effect;
     }
 
-    public void setConcentratedSpell(Spell spell) {
-        // protection against manual setting
-        if (!spell.requiresConcentration()) return;
-        
-        if (concentratedSpell != null) {
-            concentratedSpell.concentrationBroken();
+    public void breakConcentration() {
+        if (hasConcentration()) {
+            SpellEffect temp = concentrationEffect;
+            concentrationEffect = null; 
+            temp.dispose(); 
         }
-        concentratedSpell = spell;
     }
 
-    public void unsetConcentratedSpell() {
-        setConcentratedSpell(null);
+    public void concentrationCheck(int damage, DamageTypes damageType) {
+        if (!hasConcentration()) return;
+        
+        int difficultyClass = Math.max(10, damage / 2);
+
+        AbilityCategories concentrationType = switch(damageType) {
+            case REFULGENT -> AbilityCategories.SPIRIT;
+            case OBLIVIATING -> AbilityCategories.SPIRIT;
+            case PSIONIC -> AbilityCategories.INTELLECT;
+            default -> AbilityCategories.FORTITUDE;
+        };
+        
+        if (!simpleSaveCheck(difficultyClass, concentrationType)) {
+            breakConcentration();
+        }
     }
 
     public void applyDamage(int damage, DamageTypes damageType) {
@@ -133,24 +147,11 @@ public abstract class Entity
 
         hitpoints.decrease(adjustedDamage);
         
-        if (hitpoints.atMinimum())
-            unsetConcentratedSpell();
-        else if (concentratedSpell != null)
+        if (hitpoints.atMinimum()) {
+            breakConcentration();
+        } else if (concentrationEffect != null) {
             concentrationCheck(adjustedDamage, damageType);
-    }
-
-    public void concentrationCheck(int damage, DamageTypes damageType) {
-        int difficultyClass = Math.max(10, Math.floorDiv(damage, 2));
-
-        AbilityCategories concentrationType = switch(damageType) {
-            case REFULGENT -> AbilityCategories.SPIRIT;
-            case OBLIVIATING -> AbilityCategories.SPIRIT;
-            case PSIONIC -> AbilityCategories.INTELLECT;
-            default -> AbilityCategories.FORTITUDE;
-        };
-        
-        if (!simpleSaveCheck(difficultyClass, concentrationType))
-            unsetConcentratedSpell();
+        }
     }
 
     public void performAction(Action action, List<Entity> targets) {
@@ -191,9 +192,6 @@ public abstract class Entity
     public abstract int getArmourClass();
 
     public void turn() {
-        
-
-
 
     }
 
@@ -203,22 +201,11 @@ public abstract class Entity
         hasBonusAction = true;
         hasReaction = true;
 
-        //apply effects
+        //activeSpellEffects.forEach(SpellEffect::apply);
     }
 
     public void endOfTurn() {
-        appliedEffects.values().removeIf(effect -> {
-            boolean isExpired = effect.decayDuration(this);
-            
-            if (isExpired) {
-                // If this was your active concentration, clear the slot
-                if (concentratedSpell != null && concentratedSpell.getEffect() == effect) {
-                    unsetConcentratedSpell();
-                }
-                return true;
-            }
-            return false;
-        });
+        activeSpellEffects.forEach(SpellEffect::decay);
     }
 
     public void startOfRound() {
@@ -237,9 +224,8 @@ public abstract class Entity
 
     }
 
-    public boolean hasMultiInitiative() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getHasMultiInitiative'");
+    public int getOnitiativeCount() {
+        return initiativeCount;
     }
 
     public int getAbilityScore(AbilityCategories category) {
@@ -256,8 +242,7 @@ public abstract class Entity
     }
 
     public boolean hasInitiativeAdvantage() {
-        // TODO Auto-generated method stub
-        return false;
+        return hasInitiativeAdvantage;
     }
 
     public AllegianceCategories getAllegiance() {
@@ -281,21 +266,30 @@ public abstract class Entity
             .anyMatch(e -> FATAL_TYPES.contains(e.getName()));
     }
     
-    public void applyEffect(Effect effect) {
-        this.activeEffects.add(effect);
+    public void applyEffect(SpellEffect effect) {
+        this.activeSpellEffects.add(effect);
 
         this.activeConditions.add(effect.condition());
         this.activeConditions.addAll(effect.condition().getDependantConditions());
     }
 
-    public void removeEffect(Effect effect) {
-        if (!this.activeEffects.remove(effect)) return; 
+    public void removeEffect(SpellEffect effect) {
+        if (!this.activeSpellEffects.remove(effect)) return; 
         
+        effect.dispose();
         this.activeConditions.clear(); 
 
-        for (Effect e : activeEffects) {
+        for (SpellEffect e : activeSpellEffects) {
             this.activeConditions.add(e.condition());
             this.activeConditions.addAll(e.condition().getDependantConditions());
         }
+    }
+
+    public boolean hasConcentration() {
+        return concentrationEffect != null;
+    }
+
+    public SpellEffect getConcentrationEffect() {
+        return concentrationEffect;
     }
 }

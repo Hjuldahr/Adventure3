@@ -48,4 +48,8 @@ public class Item {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'isVersatile'");
     }
+
+    public String getVerb() {
+        return verb;
+    }
 }

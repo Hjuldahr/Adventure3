@@ -2,19 +2,23 @@ package com.example.adventure.entity;
 
 import com.example.adventure.currency.CoinPurse;
 import com.example.adventure.entity.AbilityScores.AbilityCategories;
+import com.example.adventure.item.Armour;
 import com.example.adventure.item.Armoury;
 import com.example.adventure.item.Inventory;
 import com.example.adventure.item.Item;
-import com.example.adventure.item.Weapon;
+import com.example.adventure.item.Shield;
 
 public class PlayerEntity extends Entity
 {
+    private static final int BASE_AC = 10;
+    
     private Armoury armoury;
     private Inventory inventory;
     private CoinPurse coinPurse;
 
     private Item mainHand = null;
     private Item offHand = null;
+    private Armour equippedArmour;
     
     public PlayerEntity(
         String name
@@ -24,7 +28,13 @@ public class PlayerEntity extends Entity
 
     @Override
     public int getArmourClass() {
-        return armoury.getArmourClass() + abilityScores.getModifier(AbilityCategories.AGILITY);
+        int armourClass = (equippedArmour != null ? equippedArmour.getArmourClass() : BASE_AC) + abilityScores.getModifier(AbilityCategories.AGILITY);
+        
+        if (offHand instanceof Shield equippedShield) {
+            armourClass += equippedShield.getArmourClass();
+        }
+
+        return armourClass;
     }
 
     @Override
@@ -44,7 +54,7 @@ public class PlayerEntity extends Entity
             System.out.println("Your hands are empty.");
         }
         // Handle two-handed items
-        else if (mainHand != null && offHand == null && mainHand.getUsesBothHands()) {
+        else if (mainHand != null && offHand == null && mainHand.requiresBoth()) {
             System.out.printf("You are %s a %s with both-hands.\n", mainHand.getVerb(), mainHand.getName());
         }
         // Handle dual-wielding (both hands full)

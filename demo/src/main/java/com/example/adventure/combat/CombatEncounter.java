@@ -24,9 +24,7 @@ public class CombatEncounter
         List<Entry> entries = new ArrayList<>();
 
         for (Entity combatant : combatants) {
-            entries.add(new Entry(rollInitiative(combatant), combatant));
-
-            if (combatant.hasMultiInitiative()) {
+            for (int n = 0; n < combatant.getOnitiativeCount(); n++) {
                 entries.add(new Entry(rollInitiative(combatant), combatant));
             }
         }
