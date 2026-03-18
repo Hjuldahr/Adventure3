@@ -1,5 +1,7 @@
 package com.example.adventure.entity;
 
+import java.util.concurrent.locks.Condition;
+
 import com.example.adventure.currency.CoinPurse;
 import com.example.adventure.entity.AbilityScores.AbilityCategories;
 import com.example.adventure.item.Armour;
@@ -28,11 +30,21 @@ public class PlayerEntity extends Entity
 
     @Override
     public int getArmourClass() {
-        int armourClass = (equippedArmour != null ? equippedArmour.getArmourClass() : BASE_AC) + abilityScores.getModifier(AbilityCategories.AGILITY);
+        int baseAC = (equippedArmour != null) ? equippedArmour.getArmourClass() : BASE_AC;
+        
+        // If wearing armour, use the cap. If unarmoured, use full Agility modifier.
+        int agilityBonus = (equippedArmour != null) 
+            ? Math.min(equippedArmour.getMaxAgilityBonus(), abilityScores.getModifier(AbilityCategories.AGILITY)) 
+            : abilityScores.getModifier(AbilityCategories.AGILITY);
+
+        int armourClass = baseAC + agilityBonus;
         
         if (offHand instanceof Shield equippedShield) {
             armourClass += equippedShield.getArmourClass();
         }
+        
+        // Hint for your TODO: You could add a 'magicBonus' variable here 
+        // to sum up rings of protection, mage armour, etc.
 
         return armourClass;
     }
@@ -151,5 +163,10 @@ public class PlayerEntity extends Entity
         if (item != null) {
             inventory.add(item);
         }
+    }
+
+    public boolean attunementCheck(Armour armour) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'attunementCheck'");
     }
 }

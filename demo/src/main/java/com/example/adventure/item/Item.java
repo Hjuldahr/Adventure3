@@ -1,14 +1,14 @@
 package com.example.adventure.item;
 
-public class Item {
-    
-    
-    public String name;
+import com.example.adventure.utility.Colours;
 
-    public int buyCost;
-    public int sellCost;
-
-    private String verb;
+public class Item implements Comparable<Item> {
+    protected ItemRarities rarity;
+    protected String name;
+    protected int buyCost;
+    protected int sellCost;
+    protected int weight;
+    protected String verb; // wielding / holding / bearing / etc
 
     public Item(String name, String verb) {
         this.name = name;
@@ -19,14 +19,19 @@ public class Item {
         this(name, "holding");
     }
 
-    public String view() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'view'");
+    public String toString() {
+        return String.format("%s[%-9s]%s %s\n\tCost: %d/%d\n\tWeight: %d", 
+            rarity.getColour(), 
+            rarity.getName(), 
+            Colours.RESET,
+            name, 
+            buyCost, sellCost,
+            weight
+        );
     }
 
     public String getName() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getName'");
+        return name;
     }
 
     public boolean requiresBoth() {
@@ -51,5 +56,44 @@ public class Item {
 
     public String getVerb() {
         return verb;
+    }
+
+    public ItemRarities getRarity() {
+        return rarity;
+    }
+
+    public int compareTo(Item other) {
+        int difference = this.rarity.compareTo(other.rarity);
+        if (difference != 0) return difference;
+        return this.name.compareToIgnoreCase(other.name);
+    }
+
+    public int getBuyCost() {
+        return buyCost;
+    }
+    public int getSellCost() {
+        return sellCost;
+    }
+    public int getWeight() {
+        return weight;
+    }
+
+    public boolean getIsUnsellable() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getIsUnsellable'");
+    }
+
+    public boolean getIsIndisposable() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getIsIndisposable'");
+    }
+
+    public boolean canAttune() {
+        throw new UnsupportedOperationException("Unimplemented method 'canAttune'");
+    }
+
+    public boolean isMagical() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isMagical'");
     }
 }
