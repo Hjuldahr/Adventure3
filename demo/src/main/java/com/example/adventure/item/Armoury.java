@@ -16,10 +16,26 @@ public class Armoury {
     private Armour donnedArmour;
     private Shield equippedShield;
 
-    private List<Weapon> weapons;
+    private TreeSet<Weapon> weapons;
     private TreeSet<Armour> armours;
-    private List<Shield> shields;
+    private TreeSet<Shield> shields;
     
+    public void viewWeapon(PlayerEntity player) {
+        ItemRarities previousCategory = null;
+
+        
+
+
+
+
+
+
+
+
+
+
+    }
+
     public void viewArmour(PlayerEntity player) {
         ItemRarities previousCategory = null;
 
@@ -37,7 +53,7 @@ public class Armoury {
             
             int baseAC = armour.getArmourClass();
             int agilityBonus = armour.getAddAgility() 
-                ? Math.min(player.getAbilityModifier(AbilityCategories.AGILITY), Armour.getMaxAgilityBonus()) 
+                ? Math.min(player.getAbilityModifier(AbilityCategories.AGILITY), armour.getMaxAgilityBonus()) 
                 : 0;
 
             int totalAC = baseAC + agilityBonus + magicBonus;

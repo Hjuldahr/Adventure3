@@ -1,13 +1,11 @@
 package com.example.adventure.item;
 
 public class Armour extends Item {
+    private ArmourTypes armourType; // base stats
 
-    private int maxAgilityBonus;
-    private int armourClass;
-
-    public Armour(String name) {
-        super(name);
-        //TODO Auto-generated constructor stub
+    public Armour(ArmourTypes armourType) {
+        super(armourType.getName());
+        this.armourType = armourType;
     }
 
     public int getArmourClass() {
