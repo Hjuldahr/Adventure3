@@ -42,7 +42,7 @@ public class Armoury {
             
             int baseAC = armour.getArmourClass();
             int agilityBonus = armour.getAddAgility() 
-                ? Math.min(player.getAbilityModifier(AbilityCategories.AGILITY), armour.getMaxAgilityBonus()) 
+                ? Math.min(player.getAbilityModifier(AbilityTypes.AGILITY), armour.getMaxAgilityBonus()) 
                 : 0;
 
             int totalAC = baseAC + agilityBonus + magicBonus;
