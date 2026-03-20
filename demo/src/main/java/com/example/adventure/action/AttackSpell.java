@@ -42,7 +42,7 @@ public class AttackSpell extends Spell {
     private int rollAttackDamage(LuckTypes luck) {
         return switch (luck) {
             case TRIUMPH -> dicePool.rollMax(); // Nat 20
-            case FUMBLE -> dicePool.rollMin(); // Nat 1
+            case DESPAIR -> dicePool.rollMin(); // Nat 1
             default -> dicePool.rollAll();
         };
     }

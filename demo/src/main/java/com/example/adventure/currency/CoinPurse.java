@@ -2,8 +2,6 @@ package com.example.adventure.currency;
 
 import java.util.EnumMap;
 
-import com.example.adventure.entity.AbilityScores.AbilityCategories;
-
 public class CoinPurse {
     public static final int MAXIMUM = 999;
     public static final int MINIMUM = 0;

@@ -14,14 +14,18 @@ import com.example.adventure.combat.DamageTypeHelper;
 import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
 import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.combat.SpellEffect;
-import com.example.adventure.entity.AbilityScores.AbilityCategories;
+import com.example.adventure.entity.Ability.AbilityTypes;
+import com.example.adventure.entity.Skills.SkillTypes;
 import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
+import com.example.adventure.utility.Dice.RollTypes;
 import com.example.adventure.utility.Success;
+import com.example.adventure.utility.Success.LuckTypes;
+import com.example.adventure.utility.Success.SuccessTypes;
 
 public abstract class Entity 
 {
-    private static final Set<String> FATAL_TYPES = Set.of("Incapacitated", "Petrified", "Unconscious", "Paralyzed", "Stunned")
+    private static final Set<String> FATAL_TYPES = Set.of("Incapacitated", "Petrified", "Unconscious", "Paralyzed", "Stunned");
     
     public String name;
     public Constrained hitpoints;
@@ -32,12 +36,13 @@ public abstract class Entity
     public boolean hasReaction = true;
 
     private EnumMap<DamageTypes,DamageModifierCategories> damageModifiers;
+    private Proficiencies proficiencies;
     
     private int profiencyBonus;
-    private Set<AbilityCategories> saveProficiencies = new HashSet<>();
 
-    protected AbilityScores abilityScores;
-    private AbilityCategories spellCastingAbilityCategory;
+    protected Ability abilities;
+    protected Skills skills;
+    private AbilityTypes spellCastingAbilityCategory;
 
     private SpellEffect concentrationEffect; 
 
@@ -70,18 +75,8 @@ public abstract class Entity
      * @param saveType
      * @return 
      */
-    public int getSaveModifier(AbilityCategories saveType) {
-        return saveProficiencies.contains(saveType) ? profiencyBonus : 0;
-    }
-
-    public boolean simpleSaveCheck(int difficultyClass, AbilityCategories saveType) {
-        int raw = Dice.d20();
-        int result = raw + getSaveModifier(saveType);
-        return Success.simpleEvaluateSuccess(difficultyClass, result);
-    }
-
     public int getSpellCastingDC() {
-        return abilityScores.getModifier(spellCastingAbilityCategory) + profiencyBonus + 8;
+        return abilities.getAbilityModifier(spellCastingAbilityCategory) + profiencyBonus + 8;
     }
 
     public void applyHeal(int heal) {
@@ -94,11 +89,11 @@ public abstract class Entity
     }
 
     public int getSpellCastingModifier() {
-        return abilityScores.getModifier(spellCastingAbilityCategory);
+        return abilities.getAbilityModifier(spellCastingAbilityCategory);
     }
 
     public int getSpellSaveDifficulty() {
-        return abilityScores.getModifier(spellCastingAbilityCategory) + profiencyBonus + 8;
+        return abilities.getAbilityModifier(spellCastingAbilityCategory) + profiencyBonus + 8;
     }
 
     public boolean hitCheck(int attackRoll) {
@@ -108,6 +103,49 @@ public abstract class Entity
     public int getProfiencyBonus() {
         return profiencyBonus;
     }
+
+    public int getSaveModifier(AbilityTypes saveType) {
+        int abilityMod = abilities.getAbilityModifier(saveType);
+        int profMod = proficiencies.calculateProficiencyBonus(saveType, profiencyBonus);
+        return abilityMod + profMod;
+    }
+
+    public int getSkillModifier(SkillTypes skillType) {
+        int abilityMod = abilities.getAbilityModifier(skillType.getAbilityType());
+        int profMod = proficiencies.calculateProficiencyBonus(skillType, profiencyBonus);
+        return abilityMod + profMod;
+    }
+
+    public boolean simpleSaveCheck(int difficultyClass, AbilityTypes saveType, RollTypes rollType) {
+        int raw = Dice.d20(rollType);
+        LuckTypes luck = Success.evaluateLuck(raw);
+        
+        if (luck == LuckTypes.DESPAIR) return false; 
+        if (luck == LuckTypes.TRIUMPH) return true;
+
+        int result = raw + getSaveModifier(saveType);
+        SuccessTypes success = Success.evaluateSuccess(result, difficultyClass);
+        
+        return success == SuccessTypes.CRIT_SUCCESS || success == SuccessTypes.SUCCESS;
+    }
+
+    public ResultRecord saveCheck(int difficultyClass, AbilityTypes saveType, RollTypes rollType) {
+        int raw = Dice.d20(rollType);
+        int result = raw + getSaveModifier(saveType); // includes profiency
+        SuccessTypes successType = Success.evaluateSuccess(result, difficultyClass);
+        LuckTypes luckType = Success.evaluateLuck(raw);
+        return new ResultRecord(successType, luckType, rollType);
+    }
+
+    public ResultRecord skillCheck(int difficultyClass, SkillTypes skillType, RollTypes rollType) {
+        int raw = Dice.d20(rollType);
+        int result = raw + getSkillModifier(skillType); // includes profiency
+        SuccessTypes successType = Success.evaluateSuccess(result, difficultyClass);
+        LuckTypes luckType = Success.evaluateLuck(raw);
+        return new ResultRecord(successType, luckType, rollType);
+    }
+
+    private record ResultRecord(SuccessTypes successType, LuckTypes luckType, RollTypes rollType) {}
 
     public void setConcentration(SpellEffect effect) {
         breakConcentration();
@@ -127,11 +165,11 @@ public abstract class Entity
         
         int difficultyClass = Math.max(10, damage / 2);
 
-        AbilityCategories concentrationType = switch(damageType) {
-            case REFULGENT -> AbilityCategories.SPIRIT;
-            case OBLIVIATING -> AbilityCategories.SPIRIT;
-            case PSIONIC -> AbilityCategories.INTELLECT;
-            default -> AbilityCategories.FORTITUDE;
+        AbilityTypes concentrationType = switch(damageType) {
+            case REFULGENT -> AbilityTypes.SPIRIT;
+            case OBLIVIATING -> AbilityTypes.SPIRIT;
+            case PSIONIC -> AbilityTypes.INTELLECT;
+            default -> AbilityTypes.FORTITUDE;
         };
         
         if (!simpleSaveCheck(difficultyClass, concentrationType)) {
@@ -185,8 +223,8 @@ public abstract class Entity
         hasReaction = success ? false : hasReaction;
     }
 
-    public int getAbilityModifier(AbilityCategories category) {
-        return abilityScores.getModifier(category);
+    public int getAbilityModifier(AbilityTypes category) {
+        return abilities.getAbilityModifier(category);
     }
 
     public abstract int getArmourClass();
@@ -228,8 +266,8 @@ public abstract class Entity
         return initiativeCount;
     }
 
-    public int getAbilityScore(AbilityCategories category) {
-        return abilityScores.getAbilityScore(category);
+    public int getAbilityScore(AbilityTypes category) {
+        return abilities.getAbilityScore(category);
     }
 
     public String getName() {
@@ -238,7 +276,7 @@ public abstract class Entity
 
     public int getInitiativeModifier() {
         // TODO add other bonuses
-        return abilityScores.getModifier(AbilityCategories.AGILITY);
+        return abilities.getAbilityModifier(AbilityTypes.AGILITY);
     }
 
     public boolean hasInitiativeAdvantage() {

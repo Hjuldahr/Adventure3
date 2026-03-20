@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class RNG {
     private static final Random rand = new Random();
@@ -83,7 +80,7 @@ public abstract class RNG {
     public static <T> List<T> randomElements(int limit, List<T> elements) {
         List<T> temp = new ArrayList<>(elements);
         Collections.shuffle(temp, rand);
-        return temp.subList(0, limit);
+        return temp.subList(0, Math.min(limit, temp.size()));
     }
 
     /**

@@ -3,9 +3,13 @@ package com.example.adventure.utility;
 import java.util.stream.IntStream;
 
 public record Dice(int count, int sides) {
+    public enum RollTypes {
+        STANDARD, ADVANTAGE, DISADVANTAGE
+    }
+    
     public int roll() {
         return IntStream.range(0, count)
-            .map(_ -> rollOnce())
+            .map(n -> rollOnce())
             .sum();
     }
 
@@ -15,12 +19,20 @@ public record Dice(int count, int sides) {
 
     public static int roll(int count, int sides) {
         return IntStream.range(0, count)
-            .map(_ -> rollOnce(sides))
+            .map(n -> rollOnce(sides))
             .sum();
     }
 
     public static int d20() {
         return rollOnce(20);
+    }
+
+    public static int d20(RollTypes rollType) {
+        return switch (rollType) {
+            case ADVANTAGE -> Math.max(rollOnce(20), rollOnce(20)); 
+            case DISADVANTAGE -> Math.min(rollOnce(20), rollOnce(20));
+            case STANDARD -> rollOnce(20);
+        };
     }
 
     public int rollAdvantage() {

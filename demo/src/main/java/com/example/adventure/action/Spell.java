@@ -1,7 +1,7 @@
 package com.example.adventure.action;
 
 import com.example.adventure.combat.SpellEffect;
-import com.example.adventure.entity.AbilityScores.AbilityCategories;
+import com.example.adventure.entity.Ability.AbilityTypes;
 import com.example.adventure.entity.Entity;
 import java.util.List;
 
@@ -36,7 +36,7 @@ public abstract class Spell {
     protected boolean noDamageOnSave;
     protected boolean noEffectOnSave;
     protected boolean recurringSave;
-    protected AbilityCategories saveType;
+    protected AbilityTypes saveType;
 
     //upcasting
 
@@ -85,7 +85,7 @@ public abstract class Spell {
         return recurringSave;
     }
 
-    public AbilityCategories getSaveType() {
+    public AbilityTypes getSaveType() {
         return saveType;
     }
 }

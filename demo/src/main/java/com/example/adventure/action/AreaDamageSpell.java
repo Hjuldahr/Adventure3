@@ -1,7 +1,6 @@
 package com.example.adventure.action;
 
 import com.example.adventure.combat.DamageTypes;
-import com.example.adventure.entity.AbilityScores.AbilityCategories;
 import com.example.adventure.entity.Entity;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.DicePool;
@@ -13,8 +12,6 @@ public class AreaDamageSpell extends Spell {
 
     private DicePool dicePool;
     private DamageTypes damageType;
-
-    private AbilityCategories saveType;
 
     @Override
     protected void applyToTarget(Entity caster, Entity target) {
@@ -47,7 +44,7 @@ public class AreaDamageSpell extends Spell {
 
         return switch (luck) {
             case TRIUMPH -> 0f; // nat 20
-            case FUMBLE  -> 2f; // nat 1
+            case DESPAIR  -> 2f; // nat 1
             default -> switch (success) {
                 case CRIT_SUCCESS -> 0.25f; // >= dc+10
                 case SUCCESS      -> 0.5f; // >= dc

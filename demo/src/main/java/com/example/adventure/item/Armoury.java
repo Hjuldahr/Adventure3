@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import com.example.adventure.entity.PlayerEntity;
-import com.example.adventure.entity.AbilityScores.AbilityCategories;
+import com.example.adventure.entity.Ability.AbilityTypes;
 import com.example.adventure.utility.Colours;
 
 public class Armoury {
@@ -22,18 +22,7 @@ public class Armoury {
     
     public void viewWeapon(PlayerEntity player) {
         ItemRarities previousCategory = null;
-
-        
-
-
-
-
-
-
-
-
-
-
+        // TODO
     }
 
     public void viewArmour(PlayerEntity player) {
@@ -65,12 +54,12 @@ public class Armoury {
                 ? String.format("%d (%s)", totalAC, formula) 
                 : String.valueOf(baseAC);
 
-            String brawnColor = (player.getAbilityScore(AbilityCategories.BRAWN) < armour.getMinBrawnScore()) ? Colours.RED.toString() : "";
+            String brawnColor = (player.getAbilityScore(AbilityTypes.BRAWN) < armour.getMinBrawnScore()) ? Colours.RED.toString() : "";
             String brawnReqText = (armour.getMinBrawnScore() != 0) 
                 ? "\n\t" + brawnColor + "Req Br " + armour.getMinBrawnScore() + "+" + Colours.RESET 
                 : "";
 
-            String attuneText = (armour.canAttune()) ? (player.attunementCheck(armour) ? "\n\t[※] Attunement" : "\n\t[ ] Attunement") : "";
+            String attuneText = (armour.canAttune()) ? (player.attunementCheck(armour) ? "\n\t[✦] Attunement" : "\n\t[ ] Attunement") : "";
 
             if (previousCategory == null || previousCategory != rarity) {
                 previousCategory = rarity;

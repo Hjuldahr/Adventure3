@@ -1,9 +1,7 @@
 package com.example.adventure.entity;
 
-import java.util.concurrent.locks.Condition;
-
 import com.example.adventure.currency.CoinPurse;
-import com.example.adventure.entity.AbilityScores.AbilityCategories;
+import com.example.adventure.entity.Ability.AbilityTypes;
 import com.example.adventure.item.Armour;
 import com.example.adventure.item.Armoury;
 import com.example.adventure.item.Inventory;
@@ -13,6 +11,7 @@ import com.example.adventure.item.Shield;
 public class PlayerEntity extends Entity
 {
     private static final int BASE_AC = 10;
+    private static final int ENCUMBERANCE_MODIFIER = 10;
     
     private Armoury armoury;
     private Inventory inventory;
@@ -21,11 +20,15 @@ public class PlayerEntity extends Entity
     private Item mainHand = null;
     private Item offHand = null;
     private Armour equippedArmour;
-    
+
     public PlayerEntity(
         String name
     ) {
         super(name);
+    }
+
+    public int getCarryLimit() {
+        return abilities.getAbilityScore(AbilityTypes.BRAWN) * ENCUMBERANCE_MODIFIER;
     }
 
     @Override
@@ -34,8 +37,8 @@ public class PlayerEntity extends Entity
         
         // If wearing armour, use the cap. If unarmoured, use full Agility modifier.
         int agilityBonus = (equippedArmour != null) 
-            ? Math.min(equippedArmour.getMaxAgilityBonus(), abilityScores.getModifier(AbilityCategories.AGILITY)) 
-            : abilityScores.getModifier(AbilityCategories.AGILITY);
+            ? Math.min(equippedArmour.getMaxAgilityBonus(), abilities.getAbilityModifier(AbilityTypes.AGILITY)) 
+            : abilities.getAbilityModifier(AbilityTypes.AGILITY);
 
         int armourClass = baseAC + agilityBonus;
         
@@ -88,7 +91,7 @@ public class PlayerEntity extends Entity
             System.out.printf("You are %s a %s with your off-hand.\n", offHand.getVerb(), offHand.getName());
         }
 
-        inventory.viewInventory();
+        inventory.viewInventory(getCarryLimit());
     }
 
     // Holding Logic

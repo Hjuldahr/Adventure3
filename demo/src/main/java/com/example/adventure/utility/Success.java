@@ -5,7 +5,7 @@ public abstract class Success {
         CRIT_FAILURE, FAILURE, SUCCESS, CRIT_SUCCESS
     }
     public static enum LuckTypes {
-        FUMBLE, NONE, TRIUMPH
+        DESPAIR, NONE, TRIUMPH, 
     }
 
     /**
@@ -32,10 +32,11 @@ public abstract class Success {
      */
     public static LuckTypes evaluateLuck(int raw) {
         if (raw == 20) return LuckTypes.TRIUMPH;
-        if (raw == 1) return LuckTypes.FUMBLE;
+        if (raw == 1) return LuckTypes.DESPAIR;
         return LuckTypes.NONE;
     }
 
+    /* 
     public String categorizeOutcome(SuccessTypes successType, LuckTypes luckType) {
         return switch (luckType) {
             case TRIUMPH -> switch (successType) {
@@ -50,12 +51,12 @@ public abstract class Success {
                 case FAILURE -> "Failure";
                 case CRIT_FAILURE -> "Crushing Failure";
             };
-            case FUMBLE -> switch (successType) {
+            case DESPAIR -> switch (successType) {
                 case CRIT_SUCCESS -> "Bumbled Success";
                 case SUCCESS -> "Uncertain Success";
                 case FAILURE -> "Terrible Failure";
                 case CRIT_FAILURE -> "Catastrophic Failure";
             };
         };
-    }
+    }*/
 }

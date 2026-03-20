@@ -35,13 +35,18 @@ public class Inventory {
     }
 
     // distinct from armour which is specialized for weapon categories
-    public void viewInventory() {
+    public void viewInventory(int carryLimit) {
+        int totalWeight = 0;
+        int totalItems = 0;
         ItemRarities previousCategory = null;
 
         for (Map.Entry<Item, Integer> entry : content.entrySet()) {
             Item item = entry.getKey();
             ItemRarities rarity = item.getRarity();   
             int qty = entry.getValue();
+            totalItems += qty;
+            int weight = item.getWeight() * qty;
+            totalWeight += weight;
             
             String qtyText = (qty > 1) ? " x" + qty : ""; 
             
@@ -63,8 +68,13 @@ public class Inventory {
                 qtyText,
                 Colours.RESET,
                 costText, // This now takes the %s slot
-                item.getWeight() * qty
+                weight
             );
         }
+
+        System.out.printf("Total\n\t%d Items\n\t%d/%d lb", 
+            totalItems, 
+            totalWeight, carryLimit
+        );
     }
 }

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.example.adventure.entity.Entity;
-import com.example.adventure.entity.AbilityScores.AbilityCategories;
+import com.example.adventure.entity.Ability.AbilityTypes;
 import com.example.adventure.entity.AllegianceCategories;
 import com.example.adventure.utility.CyclicList;
 import com.example.adventure.utility.Dice;
@@ -59,8 +59,8 @@ public class CombatEncounter
             }
 
             // 2. Tiebreaker: Ability Score (Descending)
-            int thisAgility = entity.getAbilityScore(AbilityCategories.AGILITY);
-            int otherAgility = other.entity.getAbilityScore(AbilityCategories.AGILITY);
+            int thisAgility = entity.getAbilityScore(AbilityTypes.AGILITY);
+            int otherAgility = other.entity.getAbilityScore(AbilityTypes.AGILITY);
             if (thisAgility != otherAgility) {
                 return Integer.compare(otherAgility, thisAgility);
             }
