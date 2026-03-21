@@ -1,4 +1,4 @@
-package com.example.adventure.entity;
+package com.example.adventure.utility;
 
 public abstract class RollEvaluator {
     public static SuccessTypes evaluate(int raw, int total, int difficultyClass) {

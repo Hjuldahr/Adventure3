@@ -1,6 +1,6 @@
 package com.example.adventure.combat;
 
-import com.example.adventure.action.Spell;
+import com.example.adventure.action.spells.Spell;
 import com.example.adventure.entity.Entity;
 
 public class SpellEffect {

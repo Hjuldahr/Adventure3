@@ -1,14 +1,10 @@
 package com.example.adventure.entity;
 
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.example.adventure.action.Action;
-import com.example.adventure.action.Spell;
 import com.example.adventure.combat.Condition;
 import com.example.adventure.combat.DamageTypeHelper;
 import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
@@ -18,9 +14,9 @@ import com.example.adventure.entity.Ability.AbilityTypes;
 import com.example.adventure.entity.Skills.SkillTypes;
 import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
+import com.example.adventure.utility.RollEvaluator;
 import com.example.adventure.utility.Dice.RollTypes;
-import com.example.adventure.utility.Success;
-import com.example.adventure.entity.SuccessTypes;
+import com.example.adventure.utility.SuccessTypes;
 
 public abstract class Entity 
 {
@@ -41,7 +37,7 @@ public abstract class Entity
 
     protected Ability abilities;
     protected Skills skills;
-    protected AbilityTypes spellCastingAbilityCategory;
+    protected AbilityTypes spellCastingAbilityType;
 
     protected SpellEffect concentrationEffect; 
 
@@ -78,7 +74,7 @@ public abstract class Entity
      * @return 
      */
     public int getSpellCastingDC() {
-        return abilities.getAbilityModifier(spellCastingAbilityCategory) + profiencyBonus + 8;
+        return abilities.getAbilityModifier(spellCastingAbilityType) + profiencyBonus + 8;
     }
 
     public void applyHeal(int heal) {
@@ -91,11 +87,11 @@ public abstract class Entity
     }
 
     public int getSpellCastingModifier() {
-        return abilities.getAbilityModifier(spellCastingAbilityCategory);
+        return abilities.getAbilityModifier(spellCastingAbilityType);
     }
 
     public int getSpellSaveDifficulty() {
-        return abilities.getAbilityModifier(spellCastingAbilityCategory) + profiencyBonus + 8;
+        return abilities.getAbilityModifier(spellCastingAbilityType) + profiencyBonus + 8;
     }
 
     public boolean hitCheck(int attackRoll) {
@@ -323,13 +319,5 @@ public abstract class Entity
 
     public SpellEffect getConcentrationEffect() {
         return concentrationEffect;
-    }
-
-    public void receiveDamage(int damage, boolean isCritical) {
-        hitpoints.decrease(damage);
-    }
-
-    public void receiveHealing(int healing, boolean isCritical) {
-        hitpoints.increase(healing);
     }
 }

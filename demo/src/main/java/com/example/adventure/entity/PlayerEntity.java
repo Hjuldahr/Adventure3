@@ -8,8 +8,10 @@ import com.example.adventure.item.Inventory;
 import com.example.adventure.item.Item;
 import com.example.adventure.item.Shield;
 import com.example.adventure.utility.Dice;
+import com.example.adventure.utility.RollEvaluator;
 import com.example.adventure.utility.Dice.RollTypes;
 import com.example.adventure.utility.Success;
+import com.example.adventure.utility.SuccessTypes;
 
 public class PlayerEntity extends Entity
 {

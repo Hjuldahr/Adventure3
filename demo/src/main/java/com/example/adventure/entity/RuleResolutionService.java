@@ -1,5 +1,7 @@
 package com.example.adventure.entity;
 
+import com.example.adventure.utility.SuccessTypes;
+
 public abstract class RuleResolutionService {
     /**
      * Applies the Incapacitation trait logic.

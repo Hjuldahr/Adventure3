@@ -1,4 +1,4 @@
-package com.example.adventure.entity;
+package com.example.adventure.utility;
 
 public enum SuccessTypes {
     CRIT_FAILURE, 

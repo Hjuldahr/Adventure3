@@ -1,4 +1,4 @@
-package com.example.adventure.action;
+package com.example.adventure.action.spells;
 
 import com.example.adventure.combat.SpellEffect;
 import com.example.adventure.entity.Ability.AbilityTypes;
@@ -26,7 +26,6 @@ public abstract class Spell {
 
     protected ActivationType activationType;
     protected AreaType areaType;
-
     protected int multiTargetLimit;
     protected int duration;
 
@@ -59,21 +58,7 @@ public abstract class Spell {
         resolveTargets(caster, targets);
     }
 
-    private void resolveTargets(Entity caster, List<Entity> targets) {
-        switch (areaType) {
-            case SELF -> applyToTarget(caster, caster);
-            case SINGLE_TARGET ->
-                    applyToTarget(caster, targets.getFirst());
-            case MULTI_TARGET ->
-                    targets.stream()
-                            .limit(multiTargetLimit)
-                            .forEach(t -> applyToTarget(caster, t));
-            case AOE ->
-                    targets.forEach(t -> applyToTarget(caster, t));
-        }
-    }
-
-    protected abstract void applyToTarget(Entity caster, Entity target);
+    protected abstract void resolveTargets(Entity caster, List<Entity> targets);
 
     protected void applyEffect(Entity target) {
         if (effect != null) {
