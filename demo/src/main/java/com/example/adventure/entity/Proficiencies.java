@@ -37,8 +37,8 @@ public class Proficiencies<T extends Enum<T>> {
         this.categories = new EnumMap<>(other.categories);
     }
     
-    public int getProficiencyModifier(T type, int level) {
-        return getProficiencyTier(type).getBonus() + level;
+    public int getProficiencyModifier(T type) {
+        return getProficiencyTier(type).getBonus();
     }
     public ProficiencyTiers getProficiencyTier(T type) {
         return categories.getOrDefault(type, ProficiencyTiers.UNTRAINED);

@@ -20,39 +20,41 @@ import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.Dice.RollTypes;
 import com.example.adventure.utility.Success;
-import com.example.adventure.utility.Success.LuckTypes;
-import com.example.adventure.utility.Success.SuccessTypes;
+import com.example.adventure.entity.SuccessTypes;
 
 public abstract class Entity 
 {
     private static final Set<String> FATAL_TYPES = Set.of("Incapacitated", "Petrified", "Unconscious", "Paralyzed", "Stunned");
     
-    public String name;
-    public Constrained hitpoints;
-    public Constrained spellpoints; //used by spells
+    protected int level;
+    protected String name;
+    protected Constrained hitpoints;
+    protected Constrained spellpoints; //used by spells
 
     public boolean hasAction = true;
     public boolean hasBonusAction = true;
     public boolean hasReaction = true;
 
     private EnumMap<DamageTypes,DamageModifierCategories> damageModifiers;
-    private Proficiencies proficiencies;
     
     private int profiencyBonus;
 
     protected Ability abilities;
     protected Skills skills;
-    private AbilityTypes spellCastingAbilityCategory;
+    protected AbilityTypes spellCastingAbilityCategory;
 
-    private SpellEffect concentrationEffect; 
+    protected SpellEffect concentrationEffect; 
 
-    private Set<Condition> activeConditions;
-    private Set<SpellEffect> activeSpellEffects;
+    protected Set<Condition> activeConditions;
+    protected Set<SpellEffect> activeSpellEffects;
 
-    private AllegianceCategories allegiance;
-    private boolean hasSurrendered;
-    private int initiativeCount = 1;
-    private boolean hasInitiativeAdvantage;
+    protected AllegianceCategories allegiance;
+    protected boolean hasSurrendered;
+    protected int initiativeCount = 1;
+    protected boolean hasInitiativeAdvantage;
+
+    protected Proficiencies<AbilityTypes> saveProficiencies;
+    protected Proficiencies<SkillTypes> skillProficiencies;
 
     public Entity(
         String name
@@ -106,26 +108,20 @@ public abstract class Entity
 
     public int getSaveModifier(AbilityTypes saveType) {
         int abilityMod = abilities.getAbilityModifier(saveType);
-        int profMod = proficiencies.calculateProficiencyBonus(saveType, profiencyBonus);
+        int profMod = saveProficiencies.getProficiencyModifier(saveType) + level; //proficiencies.calculateProficiencyBonus(saveType, profiencyBonus);
         return abilityMod + profMod;
     }
 
     public int getSkillModifier(SkillTypes skillType) {
         int abilityMod = abilities.getAbilityModifier(skillType.getAbilityType());
-        int profMod = proficiencies.calculateProficiencyBonus(skillType, profiencyBonus);
+        int profMod = skillProficiencies.getProficiencyModifier(saveType) + level;
         return abilityMod + profMod;
     }
 
     public boolean simpleSaveCheck(int difficultyClass, AbilityTypes saveType, RollTypes rollType) {
         int raw = Dice.d20(rollType);
-        LuckTypes luck = Success.evaluateLuck(raw);
-        
-        if (luck == LuckTypes.DESPAIR) return false; 
-        if (luck == LuckTypes.TRIUMPH) return true;
-
         int result = raw + getSaveModifier(saveType);
-        SuccessTypes success = Success.evaluateSuccess(result, difficultyClass);
-        
+        SuccessTypes success = RollEvaluator.evaluate(raw, result, difficultyClass);
         return success == SuccessTypes.CRIT_SUCCESS || success == SuccessTypes.SUCCESS;
     }
 
