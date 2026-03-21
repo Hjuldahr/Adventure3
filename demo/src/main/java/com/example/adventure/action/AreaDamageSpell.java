@@ -5,8 +5,6 @@ import com.example.adventure.entity.Entity;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.DicePool;
 import com.example.adventure.utility.Success;
-import com.example.adventure.utility.Success.LuckTypes;
-import com.example.adventure.utility.Success.SuccessTypes;
 
 public class AreaDamageSpell extends Spell {
 

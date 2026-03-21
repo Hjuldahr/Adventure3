@@ -10,8 +10,6 @@ import com.example.adventure.item.Shield;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.Dice.RollTypes;
 import com.example.adventure.utility.Success;
-import com.example.adventure.utility.Success.LuckTypes;
-import com.example.adventure.utility.Success.SuccessTypes;
 
 public class PlayerEntity extends Entity
 {
@@ -28,7 +26,8 @@ public class PlayerEntity extends Entity
     private Item offHand = null;
     private Armour equippedArmour;
 
-    private int dyingValue = 0;
+    private int passedDeathSaves = 0;
+    private int failedDeathSaves = 0;
     private boolean performingDeathSaves = false;
     private int FATAL_DYING_POINTS = 4;
 
@@ -65,20 +64,22 @@ public class PlayerEntity extends Entity
 
     private void performDeathSave() {
         int raw = Dice.d20(RollTypes.STANDARD);
-        SuccessTypes successType = Success.evaluateSuccess(raw, DEATHSAVE_DC + dyingValue);
+        SuccessTypes successType = RollEvaluator.evaluate(raw, raw, DEATHSAVE_DC);
 
-        dyingValue += switch (successType) {
-            case CRIT_SUCCESS -> -2;
-            case SUCCESS -> -1;
-            case FAILURE -> 1;
-            case CRIT_FAILURE -> 2;
-        };
+        switch (successType) {
+            case CRIT_SUCCESS -> { passedDeathSaves += 2; }:
+            case SUCCESS -> { passedDeathSaves++; }:
+            case FAILURE -> { failedDeathSaves++; }:
+            case CRIT_FAILURE -> { failedDeathSaves += 2; }:
+        }
 
-        if (dyingValue >= FATAL_DYING_POINTS) {
+        if (failedDeathSaves >= REQUIRED_DEATHSAVES) {
             //TODO trigger game over
-        } else if (dyingValue <= 0) {
-            dyingValue = 0;
-            hitpoints.setValue(1); // slightly more generous due to being singleplayer + NPCs
+        } else if (passedDeathSaves >= REQUIRED_DEATHSAVES) {
+            passedDeathSaves = 0;
+            failedDeathSaves = 0;
+            // slightly more generous due to being singleplayer + NPCs
+            hitpoints.setValue(1); 
             performingDeathSaves = false;
         }
     }
@@ -207,5 +208,27 @@ public class PlayerEntity extends Entity
     public boolean attunementCheck(Armour armour) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'attunementCheck'");
+    }
+
+    @Override
+    public void receiveDamage(int damage, boolean isCritical) {
+        super.receiveDamage(damage, isCritical);
+
+        if (performingDeathSaves) {
+            failedDeathSaves += isCritical ? 2 : 1;
+        } else {
+            performingDeathSaves = hitpoints.atMinimum();
+        }
+    }
+
+    @Override
+    public void receiveHealing(int healing, boolean isCritical) {
+        super.receiveHealing(healing, isCritical);
+
+        if (performingDeathSaves && !hitpoints.atMinimum()) {
+            passedDeathSaves = 0;
+        } else {
+            performingDeathSaves = hitpoints.atMinimum();
+        }
     }
 }

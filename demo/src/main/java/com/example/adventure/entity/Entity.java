@@ -108,13 +108,13 @@ public abstract class Entity
 
     public int getSaveModifier(AbilityTypes saveType) {
         int abilityMod = abilities.getAbilityModifier(saveType);
-        int profMod = saveProficiencies.getProficiencyModifier(saveType) + level; //proficiencies.calculateProficiencyBonus(saveType, profiencyBonus);
+        int profMod = saveProficiencies.getProficiencyModifier(saveType, profiencyBonus) + level; //proficiencies.calculateProficiencyBonus(saveType, profiencyBonus);
         return abilityMod + profMod;
     }
 
     public int getSkillModifier(SkillTypes skillType) {
         int abilityMod = abilities.getAbilityModifier(skillType.getAbilityType());
-        int profMod = skillProficiencies.getProficiencyModifier(saveType) + level;
+        int profMod = skillProficiencies.getProficiencyModifier(skillType, profiencyBonus) + level;
         return abilityMod + profMod;
     }
 
@@ -323,5 +323,13 @@ public abstract class Entity
 
     public SpellEffect getConcentrationEffect() {
         return concentrationEffect;
+    }
+
+    public void receiveDamage(int damage, boolean isCritical) {
+        hitpoints.decrease(damage);
+    }
+
+    public void receiveHealing(int healing, boolean isCritical) {
+        hitpoints.increase(healing);
     }
 }
