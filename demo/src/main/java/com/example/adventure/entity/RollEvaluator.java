@@ -1,8 +1,6 @@
-package com.example.adventure.utility;
+package com.example.adventure.entity;
 
-public abstract class Success {
-    
-
+public abstract class RollEvaluator {
     /**
      * Evaluates the base degree of success based on PF2e rules.
      * 

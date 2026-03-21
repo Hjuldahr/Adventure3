@@ -7,11 +7,18 @@ import com.example.adventure.item.Armoury;
 import com.example.adventure.item.Inventory;
 import com.example.adventure.item.Item;
 import com.example.adventure.item.Shield;
+import com.example.adventure.utility.Dice;
+import com.example.adventure.utility.Dice.RollTypes;
+import com.example.adventure.utility.Success;
+import com.example.adventure.utility.Success.LuckTypes;
+import com.example.adventure.utility.Success.SuccessTypes;
 
 public class PlayerEntity extends Entity
 {
     private static final int BASE_AC = 10;
+    private static final int DEATHSAVE_DC = 10;
     private static final int ENCUMBERANCE_MODIFIER = 10;
+    private static final int REQUIRED_DEATHSAVES = 3;
     
     private Armoury armoury;
     private Inventory inventory;
@@ -20,6 +27,10 @@ public class PlayerEntity extends Entity
     private Item mainHand = null;
     private Item offHand = null;
     private Armour equippedArmour;
+
+    private int dyingValue = 0;
+    private boolean performingDeathSaves = false;
+    private int FATAL_DYING_POINTS = 4;
 
     public PlayerEntity(
         String name
@@ -52,8 +63,33 @@ public class PlayerEntity extends Entity
         return armourClass;
     }
 
+    private void performDeathSave() {
+        int raw = Dice.d20(RollTypes.STANDARD);
+        SuccessTypes successType = Success.evaluateSuccess(raw, DEATHSAVE_DC + dyingValue);
+
+        dyingValue += switch (successType) {
+            case CRIT_SUCCESS -> -2;
+            case SUCCESS -> -1;
+            case FAILURE -> 1;
+            case CRIT_FAILURE -> 2;
+        };
+
+        if (dyingValue >= FATAL_DYING_POINTS) {
+            //TODO trigger game over
+        } else if (dyingValue <= 0) {
+            dyingValue = 0;
+            hitpoints.setValue(1); // slightly more generous due to being singleplayer + NPCs
+            performingDeathSaves = false;
+        }
+    }
+
     @Override
     public void turn() {
+        if (performingDeathSaves) {
+            performDeathSave();
+            if (hitpoints.atMinimum()) return;
+        }
+
         super.turn();
     }
 

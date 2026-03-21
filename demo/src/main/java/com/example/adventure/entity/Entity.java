@@ -132,20 +132,18 @@ public abstract class Entity
     public ResultRecord saveCheck(int difficultyClass, AbilityTypes saveType, RollTypes rollType) {
         int raw = Dice.d20(rollType);
         int result = raw + getSaveModifier(saveType); // includes profiency
-        SuccessTypes successType = Success.evaluateSuccess(result, difficultyClass);
-        LuckTypes luckType = Success.evaluateLuck(raw);
-        return new ResultRecord(successType, luckType, rollType);
+        SuccessTypes degree = RollEvaluator.evaluate(raw, result, difficultyClass);
+        return new ResultRecord(degree, raw, result, rollType);
     }
 
     public ResultRecord skillCheck(int difficultyClass, SkillTypes skillType, RollTypes rollType) {
         int raw = Dice.d20(rollType);
         int result = raw + getSkillModifier(skillType); // includes profiency
-        SuccessTypes successType = Success.evaluateSuccess(result, difficultyClass);
-        LuckTypes luckType = Success.evaluateLuck(raw);
-        return new ResultRecord(successType, luckType, rollType);
+        SuccessTypes successType = RollEvaluator.evaluate(raw, result, difficultyClass);
+        return new ResultRecord(successType, raw, result, rollType);
     }
 
-    private record ResultRecord(SuccessTypes successType, LuckTypes luckType, RollTypes rollType) {}
+    private record ResultRecord(SuccessTypes degrees, int raw, int result, RollTypes rollType) {}
 
     public void setConcentration(SpellEffect effect) {
         breakConcentration();
@@ -172,7 +170,7 @@ public abstract class Entity
             default -> AbilityTypes.FORTITUDE;
         };
         
-        if (!simpleSaveCheck(difficultyClass, concentrationType)) {
+        if (!simpleSaveCheck(difficultyClass, concentrationType, RollTypes.STANDARD)) {
             breakConcentration();
         }
     }
