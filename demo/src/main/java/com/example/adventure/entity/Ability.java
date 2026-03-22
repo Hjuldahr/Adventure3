@@ -2,6 +2,9 @@ package com.example.adventure.entity;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Map;
+
+import com.example.adventure.entity.Proficiencies.ProficiencyTiers;
 
 public class Ability {
     public static final int MAXIMUM = 30;
@@ -9,12 +12,23 @@ public class Ability {
     public static final int BASELINE = 10;
 
     public static enum AbilityTypes {
-        BRAWN,
-        FORTITUDE,
-        AGILITY,
-        INTELLECT,
-        CHARM,
-        SPIRIT
+        BRAWN("BR", "Brawn"),
+        FORTITUDE("FO", "Fortitude"),
+        AGILITY("AG", "Agility"),
+        INTELLECT("IN", "Intellect"),
+        CHARM("CH", "Charm"),
+        SPIRIT("SP", "Spirit");
+
+        private final String symbol;
+        private final String name;
+
+        AbilityTypes(String symbol, String name) {
+            this.symbol = symbol;
+            this.name = name;
+        }
+
+        public String getSymbol() { return symbol; }
+        public String getName() { return name; }
     };
 
     public static HashMap<Integer,Integer> abilityModifierLookup = new HashMap<>();
@@ -70,5 +84,20 @@ public class Ability {
     public int getAbilityModifier(AbilityTypes category) {
         int score = abilities.getOrDefault(category, BASELINE);
         return abilityModifierLookup.computeIfAbsent(score, s -> Math.floorDiv(s - BASELINE, 2));
+    }
+
+    public void viewAbilities(Proficiencies<AbilityTypes> proficiencies) {
+        for (Map.Entry<AbilityTypes,Integer> ability : abilities.entrySet()) {
+            AbilityTypes abilityType = ability.getKey();
+            int abilityScore = ability.getValue();
+            ProficiencyTiers proficiencyTier = proficiencies.getProficiencyTier(abilityType);
+
+            int abilityMod = abilityModifierLookup.get(abilityScore);
+            String abilityModText = abilityMod == 0 ? "" : (abilityMod > 0 ? "+" + abilityMod : Integer.toString(abilityMod));
+
+            System.out.printf("[%s] %s %s %s\n", 
+                proficiencyTier.getSymbol(), abilityScore, abilityModText
+            );
+        }
     }
 }

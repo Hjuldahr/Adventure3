@@ -2,6 +2,8 @@ package com.example.adventure.entity;
 
 import com.example.adventure.currency.CoinPurse;
 import com.example.adventure.entity.Ability.AbilityTypes;
+import com.example.adventure.entity.Proficiencies.ProficiencyTiers;
+import com.example.adventure.entity.Skills.SkillTypes;
 import com.example.adventure.item.Armour;
 import com.example.adventure.item.Armoury;
 import com.example.adventure.item.Inventory;
@@ -31,7 +33,6 @@ public class PlayerEntity extends Entity
     private int passedDeathSaves = 0;
     private int failedDeathSaves = 0;
     private boolean performingDeathSaves = false;
-    private int FATAL_DYING_POINTS = 4;
 
     public PlayerEntity(
         String name
@@ -90,7 +91,7 @@ public class PlayerEntity extends Entity
     public void turn() {
         if (performingDeathSaves) {
             performDeathSave();
-            if (hitpoints.atMinimum()) return;
+            if (hitPoints.atMinimum()) return;
         }
 
         super.turn();
@@ -227,10 +228,32 @@ public class PlayerEntity extends Entity
     public void receiveHealing(int healing, boolean isCritical) {
         super.receiveHealing(healing, isCritical);
 
-        if (performingDeathSaves && !hitpoints.atMinimum()) {
+        if (performingDeathSaves && !hitpPoints.atMinimum()) {
             passedDeathSaves = 0;
         } else {
-            performingDeathSaves = hitpoints.atMinimum();
+            performingDeathSaves = hitPoints.atMinimum();
+        }
+    }
+
+    public void viewSkills() {
+        System.out.printf("%+d Proficiency Bonus\n", profiencyBonus);
+        
+        for (AbilityTypes abilityType : AbilityTypes.values()) {
+            int score = getAbilityScore(abilityType); 
+            int mod = getAbilityModifier(abilityType);
+            
+            System.out.printf("%s %d (%+d)\n", 
+                abilityType.getName(), score, mod);
+
+            ProficiencyTiers saveTier = saveProficiencies.getProficiencyTier(abilityType);
+            System.out.printf("\t[%s] %+d Saving Throw\n", 
+                saveTier.getSymbol(), getSaveModifier(abilityType));
+
+            for (SkillTypes skill : SkillTypes.getSkillsByAbility(abilityType)) {
+                ProficiencyTiers skillTier = skillProficiencies.getProficiencyTier(skill);
+                System.out.printf("\t[%s] %+d %s\n", 
+                    skillTier.getSymbol(), getSkillModifier(skill), skill.getName());
+            }
         }
     }
 }

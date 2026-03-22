@@ -1,20 +1,19 @@
 package com.example.adventure.entity;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 import com.example.adventure.action.Action;
 import com.example.adventure.combat.AllegianceTypes;
 import com.example.adventure.combat.CombatEncounter;
-import com.example.adventure.combat.Condition;
 import com.example.adventure.combat.ConditionTypes;
 import com.example.adventure.combat.DamageTypeHelper;
 import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
 import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.combat.SpellEffect;
 import com.example.adventure.entity.Ability.AbilityTypes;
-import com.example.adventure.entity.Skills.SkillTypes;
 import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.DicePool;
@@ -24,7 +23,7 @@ import com.example.adventure.utility.SuccessTypes;
 
 public abstract class Entity 
 {
-    private static final Set<String> FATAL_TYPES = Set.of("Incapacitated", "Petrified", "Unconscious", "Paralyzed", "Stunned");
+    private static final EnumSet<ConditionTypes> FATAL_TYPES = EnumSet.of(CHARMED, INCAPACITATED, PARALYZED, PETRIFIED, STUNNED, UNCONSCIOUS);
     
     protected int level;
     protected String name;
@@ -42,7 +41,7 @@ public abstract class Entity
     protected int profiencyBonus;
 
     protected Ability abilities;
-    protected Skills skills;
+    protected SkillTypes skills;
     protected AbilityTypes spellCastingAbilityType;
 
     protected SpellEffect concentrationEffect; 
@@ -124,13 +123,13 @@ public abstract class Entity
 
     public int getSaveModifier(AbilityTypes saveType) {
         int abilityMod = abilities.getAbilityModifier(saveType);
-        int profMod = saveProficiencies.getProficiencyModifier(saveType, profiencyBonus) + level; //proficiencies.calculateProficiencyBonus(saveType, profiencyBonus);
+        int profMod = saveProficiencies.getProficiencyModifier(saveType, profiencyBonus);
         return abilityMod + profMod;
     }
 
     public int getSkillModifier(SkillTypes skillType) {
         int abilityMod = abilities.getAbilityModifier(skillType.getAbilityType());
-        int profMod = skillProficiencies.getProficiencyModifier(skillType, profiencyBonus) + level;
+        int profMod = skillProficiencies.getProficiencyModifier(skillType, profiencyBonus);
         return abilityMod + profMod;
     }
 
