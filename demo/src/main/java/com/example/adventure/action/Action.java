@@ -27,4 +27,9 @@ public class Action {
         throw new UnsupportedOperationException("Unimplemented method 'getReactionUsage'");
     }
 
+    // i.e. dodging or standing up after being prone
+    public boolean getManueverUsage() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getReactionUsage'");
+    }
 }

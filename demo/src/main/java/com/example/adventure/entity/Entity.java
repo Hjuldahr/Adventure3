@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.example.adventure.action.Action;
+import com.example.adventure.combat.AllegianceTypes;
+import com.example.adventure.combat.CombatEncounter;
 import com.example.adventure.combat.Condition;
+import com.example.adventure.combat.ConditionTypes;
 import com.example.adventure.combat.DamageTypeHelper;
 import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
 import com.example.adventure.combat.DamageTypes;
@@ -14,6 +17,7 @@ import com.example.adventure.entity.Ability.AbilityTypes;
 import com.example.adventure.entity.Skills.SkillTypes;
 import com.example.adventure.utility.Constrained;
 import com.example.adventure.utility.Dice;
+import com.example.adventure.utility.DicePool;
 import com.example.adventure.utility.RollEvaluator;
 import com.example.adventure.utility.Dice.RollTypes;
 import com.example.adventure.utility.SuccessTypes;
@@ -24,16 +28,18 @@ public abstract class Entity
     
     protected int level;
     protected String name;
-    protected Constrained hitpoints;
+    protected Constrained hitPoints;
+    protected Constrained temporaryHitPoints;
     protected Constrained spellpoints; //used by spells
 
-    public boolean hasAction = true;
-    public boolean hasBonusAction = true;
-    public boolean hasReaction = true;
+    protected boolean hasAction = true;
+    protected boolean hasBonusAction = true;
+    protected boolean hasReaction = true;
+    protected boolean hasManueverAction = true;
 
-    private EnumMap<DamageTypes,DamageModifierCategories> damageModifiers;
+    protected EnumMap<DamageTypes,DamageModifierCategories> damageModifiers;
     
-    private int profiencyBonus;
+    protected int profiencyBonus;
 
     protected Ability abilities;
     protected Skills skills;
@@ -41,31 +47,43 @@ public abstract class Entity
 
     protected SpellEffect concentrationEffect; 
 
-    protected Set<Condition> activeConditions;
+    protected Set<ConditionTypes> activeConditions;
     protected Set<SpellEffect> activeSpellEffects;
 
-    protected AllegianceCategories allegiance;
-    protected boolean hasSurrendered;
+    protected AllegianceTypes allegiance;
+    protected boolean hasSurrendered = false;
     protected int initiativeCount = 1;
-    protected boolean hasInitiativeAdvantage;
+    protected boolean hasInitiativeAdvantage = false;
 
     protected Proficiencies<AbilityTypes> saveProficiencies;
     protected Proficiencies<SkillTypes> skillProficiencies;
 
+    protected int totalDamageDealtThisEncounter = 0;
+    protected int totalHealingGivenThisEncounter = 0;
+    protected CombatEncounter combatContext = null;
+
+    protected DicePool hitDice;
+
+    protected SizeCategory sizeCategory;
+
     public Entity(
-        String name
+        String name,
+        AllegianceTypes allegiance,
+        DicePool hitDice,
+        int initialHitPoints
     ) {
         this.name = name;
+        this.allegiance = allegiance;
 
         // TODO derive from ability scores
-        hitpoints = new Constrained(0, 999);
-        spellpoints = new Constrained(0, 999);
+
+        this.hitDice = hitDice;
+        this.hitPoints = new Constrained(0, initialHitPoints);
+        this.spellpoints = new Constrained(0, 999);
     }
 
     public Entity(Entity other) {
-        this(
-            other.name
-        );
+        this(other.name, other.allegiance, other.hitDice, other.hitPoints.getValue());
     }
 
     /**
@@ -78,7 +96,7 @@ public abstract class Entity
     }
 
     public void applyHeal(int heal) {
-        hitpoints.increase(heal);
+        hitPoints.increase(heal);
     }
 
     public float getDamageModifier(DamageTypes damageType) {
@@ -101,6 +119,8 @@ public abstract class Entity
     public int getProfiencyBonus() {
         return profiencyBonus;
     }
+
+    public Constrained getHitPoints() { return hitPoints; }
 
     public int getSaveModifier(AbilityTypes saveType) {
         int abilityMod = abilities.getAbilityModifier(saveType);
@@ -173,9 +193,9 @@ public abstract class Entity
         
         if (adjustedDamage <= 0) return;
 
-        hitpoints.decrease(adjustedDamage);
+        hitPoints.decrease(adjustedDamage);
         
-        if (hitpoints.atMinimum()) {
+        if (hitPoints.atMinimum()) {
             breakConcentration();
         } else if (concentrationEffect != null) {
             concentrationCheck(adjustedDamage, damageType);
@@ -220,7 +240,7 @@ public abstract class Entity
     public abstract int getArmourClass();
 
     public void turn() {
-
+        
     }
 
     public void startOfTurn() {
@@ -228,6 +248,7 @@ public abstract class Entity
         hasAction = true;
         hasBonusAction = true;
         hasReaction = true;
+        hasManueverAction = true;
 
         //activeSpellEffects.forEach(SpellEffect::apply);
     }
@@ -244,12 +265,20 @@ public abstract class Entity
 
     }
 
-    public void startOfEncounter() {
-
+    public void startOfEncounter(CombatEncounter combatContext) {
+        cleanupCombatState();
+        this.combatContext = combatContext;
     }
 
     public void endOfEncounter() {
+        cleanupCombatState();
+    }
 
+    private void cleanupCombatState() {
+        combatContext = null;
+        hasSurrendered = false;
+        totalDamageDealtThisEncounter = 0;
+        totalHealingGivenThisEncounter = 0;
     }
 
     public int getOnitiativeCount() {
@@ -273,7 +302,7 @@ public abstract class Entity
         return hasInitiativeAdvantage;
     }
 
-    public AllegianceCategories getAllegiance() {
+    public AllegianceTypes getAllegiance() {
         return allegiance;
     }
 
@@ -285,8 +314,8 @@ public abstract class Entity
 
     public boolean isDefeated() {
         if (hasSurrendered) return true; // gave up
-        if (hitpoints.atMinimum()) return true; // 0 hitpoints
-        return hitpoints.getRatio() <= 0.01f && hasFatalCondition(); // if at under 1% HP and has a disabling effect (functionally on deaths door)
+        if (hitPoints.atMinimum()) return true; // 0 hitPoints
+        return hitPoints.getRatio() <= 0.01f && hasFatalCondition(); // if at under 1% HP and has a disabling effect (functionally on deaths door)
     }
 
     public boolean hasFatalCondition() {
@@ -319,5 +348,38 @@ public abstract class Entity
 
     public SpellEffect getConcentrationEffect() {
         return concentrationEffect;
+    }
+
+    public float getAssassinMetric(float damageWeight, float healWeight) {
+        return (float)(totalDamageDealtThisEncounter) * damageWeight + (float)(totalHealingGivenThisEncounter) * healWeight;
+    }
+
+    public CombatEncounter getCombatContext() {
+        return combatContext;
+    }
+
+    public abstract boolean isMeleeOnly();
+    protected abstract boolean isRangedOnly();
+
+    public abstract boolean hasReachAttacks();
+
+    public boolean isInFrontLine() {
+        return combatContext.getPosition(this);
+    }
+    public boolean isInBackLine() {
+        return !combatContext.getPosition(this);
+    }
+    public void moveToFrontLine() {
+        combatContext.setPosition(this, true);
+    }
+    public void moveToBackLine() {
+        combatContext.setPosition(this, false);
+    }
+
+    protected abstract void attemptAttack(List<Entity> targets);
+    protected abstract boolean attemptHeal(List<Entity> targets);
+
+    public boolean hasCondition(ConditionTypes c) {
+        return activeConditions.contains(c);
     }
 }

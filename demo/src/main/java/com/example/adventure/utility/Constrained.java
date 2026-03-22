@@ -148,10 +148,25 @@ public class Constrained
     private boolean constraintCheck(int checkedValue) {
         return checkedValue >= minValue && checkedValue <= maxValue;
     }
-
     private void swapBounds() {
         int tempBound = minValue;
         minValue = maxValue;
         maxValue = tempBound;
+    }
+    /**
+     * Percentage test
+     * @param threshold
+     * @return if less then threshold
+     */
+    public boolean thresholdCheck(float threshold) {
+        return getRatio() <= threshold; 
+    }
+    /**
+     * Scalar test
+     * @param threshold
+     * @return if less then threshold
+     */
+    public boolean thresholdCheck(int threshold) {
+        return value <= threshold; 
     }
 }

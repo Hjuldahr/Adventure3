@@ -39,6 +39,10 @@ public abstract class Spell {
 
     //upcasting
 
+    public Spell(String name) {
+
+    }
+
     public String getName() {
         return name;
     }

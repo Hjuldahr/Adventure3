@@ -3,23 +3,60 @@ package com.example.adventure.combat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import com.example.adventure.entity.Entity;
+import com.example.adventure.entity.NonPlayerEntity;
 import com.example.adventure.entity.Ability.AbilityTypes;
-import com.example.adventure.entity.AllegianceCategories;
+import com.example.adventure.entity.EnemyEntity;
 import com.example.adventure.utility.CyclicList;
 import com.example.adventure.utility.Dice;
 
 public class CombatEncounter 
 {
-    CyclicList<Entity> combatOrder = new CyclicList<>();
+    private CyclicList<Entity> combatOrder = new CyclicList<>();
+
+    // true is front line, false is back line
+    private HashMap<Entity,Boolean> party;
+    private HashMap<Entity,Boolean> enemies;
 
     public CombatEncounter() {
         
         
     }
 
-    private void setCombatants(List<Entity> combatants) {
+    // test if party member is in melee range of target
+    public boolean isMeleeRange(Entity attacker, Entity target, boolean hasReach) {
+        Boolean attackerFront = getPosition(attacker);
+        Boolean targetFront = getPosition(target);
+
+        if (attackerFront == null || targetFront == null) return false;
+        
+        if (!hasReach) {
+            return attackerFront && targetFront; // both upfront
+        } else {
+            return attackerFront || targetFront; // atleast one upfront
+        }
+    }
+
+    public boolean isRangedRange(Entity attacker, Entity target) {
+        Boolean attackerFront = getPosition(attacker);
+        Boolean targetFront = getPosition(target);
+
+        if (attackerFront == null || targetFront == null) return false;
+
+        return !attackerFront || !targetFront; // atleast one not upfront
+    }
+
+    // Helper to check which map the entity is in
+    public Boolean getPosition(Entity e) {
+        if (party.containsKey(e)) return party.get(e);
+        if (enemies.containsKey(e)) return enemies.get(e);
+        return null;
+    }
+
+    public void setCombatants(List<Entity> combatants) {
         combatOrder = new CyclicList<>(combatants.size());
         List<Entry> entries = new ArrayList<>();
 
@@ -88,7 +125,7 @@ public class CombatEncounter
 
         if (!combatCheck()) return CombatState.NO_COMBAT; 
 
-        combatOrder.forEach(Entity::startOfEncounter);
+        combatOrder.forEach(e -> e.startOfEncounter(this));
 
         while (nextRound(roundNumber++)) {}
 
@@ -131,19 +168,36 @@ public class CombatEncounter
     private CombatState combatStateCheck() {
         // categorize combat state
         boolean anyAllies = combatOrder.elements().stream()
-            .anyMatch(e -> e.getAllegiance() == AllegianceCategories.FRIENDLY && !e.isDefeated());
+            .anyMatch(e -> e.getAllegiance() == AllegianceTypes.PARTY && !e.isDefeated());
 
         if (!anyAllies) {
             return CombatState.PARTY_DEFEAT;
         }
         
         boolean anyEnemies = combatOrder.elements().stream()
-            .anyMatch(e -> e.getAllegiance() == AllegianceCategories.HOSTILE && !e.isDefeated());
+            .anyMatch(e -> e.getAllegiance() == AllegianceTypes.ENEMY && !e.isDefeated());
 
         if (!anyEnemies) {
             return CombatState.PARTY_VICTORY;
         }
 
         return CombatState.IN_COMBAT;
+    }
+
+    public Set<Entity> getEnemies() {
+        return enemies.keySet();
+    }
+
+    public Set<Entity> getParty() {
+        return party.keySet();
+    }
+
+    public void setPosition(Entity e, boolean b) {
+        if (party.containsKey(e)) {
+            party.put(e, b);
+        }
+        else if (enemies.containsKey(e)) {
+            enemies.put(e, b);
+        }
     }
 }
