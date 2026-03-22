@@ -2,11 +2,25 @@ package com.example.adventure.utility;
 
 import java.util.stream.IntStream;
 
-public record Dice(int count, int sides) {
+public class Dice {
     public enum RollTypes {
-        STANDARD, ADVANTAGE, DISADVANTAGE
+        STANDARD, 
+        ADVANTAGE, 
+        DISADVANTAGE
     }
     
+    private final int count;
+    private final int sides;
+
+    public Dice(int count, int sides) {
+        this.count = count;
+        this.sides = sides;
+    }
+    
+    public Dice(int sides) {
+        this(1, sides);
+    }
+
     public int roll() {
         return IntStream.range(0, count)
             .map(n -> rollOnce())
@@ -23,16 +37,15 @@ public record Dice(int count, int sides) {
             .sum();
     }
 
-    public static int d20() {
-        return rollOnce(20);
-    }
-
-    public static int d20(RollTypes rollType) {
+    public static int rollD20(RollTypes rollType) {
         return switch (rollType) {
             case ADVANTAGE -> Math.max(rollOnce(20), rollOnce(20)); 
             case DISADVANTAGE -> Math.min(rollOnce(20), rollOnce(20));
             case STANDARD -> rollOnce(20);
         };
+    }
+    public static int rollD20() {
+        return rollOnce(20);
     }
 
     public int rollAdvantage() {
@@ -44,6 +57,7 @@ public record Dice(int count, int sides) {
     }
 
     public int rollOnce() {
+        if (sides <= 0) return 0;
         return RNG.randomInt(1, sides + 1);
     }
 
@@ -62,5 +76,33 @@ public record Dice(int count, int sides) {
     @Override
     public String toString() {
         return count + "d" + sides;
+    }
+
+    public static Dice d4() {
+        return new Dice(4);
+    }
+
+    public static Dice d6() {
+        return new Dice(6);
+    }
+
+    public static Dice d8() {
+        return new Dice(8);
+    }
+
+    public static Dice d10() {
+        return new Dice(10);
+    }
+
+    public static Dice d12() {
+        return new Dice(12);
+    }
+
+    public static Dice d20() {
+        return new Dice(20);
+    }
+
+    public static Dice d0() {
+        return new Dice(0);
     }
 }

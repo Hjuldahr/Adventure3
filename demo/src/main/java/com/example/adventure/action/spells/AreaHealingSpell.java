@@ -18,7 +18,7 @@ public class AreaHealingSpell extends Spell {
     }
 
     protected void applyToTarget(Entity target, int healing) {
-        int raw = Dice.d20();
+        int raw = Dice.rollD20();
         int effectiveHeal = calculateHealOverride(raw, healing);
 
         target.applyHeal(effectiveHeal);

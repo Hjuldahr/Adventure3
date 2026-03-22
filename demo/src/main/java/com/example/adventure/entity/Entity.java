@@ -23,8 +23,6 @@ import com.example.adventure.utility.SuccessTypes;
 
 public abstract class Entity 
 {
-    private static final EnumSet<ConditionTypes> FATAL_TYPES = EnumSet.of(CHARMED, INCAPACITATED, PARALYZED, PETRIFIED, STUNNED, UNCONSCIOUS);
-    
     protected int level;
     protected String name;
     protected Constrained hitPoints;
@@ -123,13 +121,13 @@ public abstract class Entity
 
     public int getSaveModifier(AbilityTypes saveType) {
         int abilityMod = abilities.getAbilityModifier(saveType);
-        int profMod = saveProficiencies.getProficiencyModifier(saveType, profiencyBonus);
+        int profMod = saveProficiencies.getBonusValue(saveType, profiencyBonus);
         return abilityMod + profMod;
     }
 
     public int getSkillModifier(SkillTypes skillType) {
         int abilityMod = abilities.getAbilityModifier(skillType.getAbilityType());
-        int profMod = skillProficiencies.getProficiencyModifier(skillType, profiencyBonus);
+        int profMod = skillProficiencies.getBonusValue(skillType, profiencyBonus);
         return abilityMod + profMod;
     }
 
@@ -325,8 +323,8 @@ public abstract class Entity
     public void applyEffect(SpellEffect effect) {
         this.activeSpellEffects.add(effect);
 
-        this.activeConditions.add(effect.condition());
-        this.activeConditions.addAll(effect.condition().getDependantConditions());
+        this.activeConditions.add(effect.getCondition());
+        this.activeConditions.addAll(effect.getCondition().getDependantConditions());
     }
 
     public void removeEffect(SpellEffect effect) {
@@ -336,8 +334,8 @@ public abstract class Entity
         this.activeConditions.clear(); 
 
         for (SpellEffect e : activeSpellEffects) {
-            this.activeConditions.add(e.condition());
-            this.activeConditions.addAll(e.condition().getDependantConditions());
+            this.activeConditions.add(e.getCondition());
+            this.activeConditions.addAll(e.getCondition().getDependantConditions());
         }
     }
 

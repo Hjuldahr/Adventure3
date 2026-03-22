@@ -16,7 +16,7 @@ public class HealingSpell extends Spell {
     }
 
     protected void applyToTarget(Entity target, int casterHealingBonus) {
-        int raw = Dice.d20();
+        int raw = Dice.rollD20();
         int healing = rollHealing(raw) + casterHealingBonus;
 
         target.applyHeal(healing);

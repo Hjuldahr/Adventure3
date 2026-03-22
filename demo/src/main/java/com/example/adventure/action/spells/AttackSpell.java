@@ -41,7 +41,7 @@ public class AttackSpell extends Spell {
         }
 
         // Dice.d20(adv, dis) handles the cancellation internally
-        int casterRaw = Dice.d20();
+        int casterRaw = Dice.rollD20();
         int casterResult = casterRaw + caster.getSpellCastingModifier() + caster.getProfiencyBonus();
 
         int targetArmourClass = target.getArmourClass();

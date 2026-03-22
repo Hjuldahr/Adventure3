@@ -9,6 +9,10 @@ public class DicePool
     private List<Dice> dicePool;
     private int flatModifier;
 
+    public DicePool(Dice... dicePool) {
+        this(0, List.of(dicePool));
+    }
+    
     public DicePool(int flatModifier, List<Dice> dicePool) {
         this.dicePool = new ArrayList<>(dicePool);
         this.flatModifier = flatModifier;

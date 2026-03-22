@@ -24,7 +24,7 @@ public class AreaDamageSpell extends Spell {
     }
 
     protected void applyToTarget(Entity target, int spellSaveDC, int damage) {
-        int raw = Dice.d20();
+        int raw = Dice.rollD20();
         int result = raw + target.getAbilityModifier(saveType)
                 + target.getSaveModifier(saveType);
 

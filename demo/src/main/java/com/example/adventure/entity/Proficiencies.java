@@ -1,6 +1,7 @@
 package com.example.adventure.entity;
 
 import java.util.EnumMap;
+import java.util.Objects;
 
 public class Proficiencies<T extends Enum<T>> {
     

@@ -18,7 +18,7 @@ public class InstantDamageSpell extends Spell {
         int damage = dicePool.rollAll();
         target.applyDamage(damage, damageType);
 
-        int raw = Dice.d20();
+        int raw = Dice.rollD20();
         int result = raw + target.getAbilityModifier(saveType) + target.getSaveModifier(saveType);
         SuccessTypes success = RollEvaluator.evaluate(raw, result, spellSaveDC);
 
