@@ -4,23 +4,9 @@ import java.util.Arrays;
 import java.util.EnumSet;
 
 import com.example.adventure.action.WeaponAttack;
+import com.example.adventure.item.WeaponItem.WeaponProperties;
 
 public abstract class WeaponTemplates {
-    public enum WeaponProperties {
-        LIGHT, 
-        FINESSE, 
-        THROWN, 
-        TWO_HANDED, 
-        VERSATILE, 
-        LOADING, 
-        HEAVY, 
-        REACH, 
-        SPECIAL, 
-        AMMUNITION_BOLT, 
-        AMMUNITION_ARROW, 
-        AMMUNITION_STONE, 
-        AMMUNITION_NEEDLE
-    }
     public static final EnumSet<WeaponProperties> ammunitionProperties = EnumSet.of(
         WeaponProperties.AMMUNITION_BOLT, 
         WeaponProperties.AMMUNITION_ARROW, 
@@ -42,10 +28,10 @@ public abstract class WeaponTemplates {
         SPEAR("Spear", 1, CurrencyTypes.GOLD, WeaponAttack.D6_PIERCING, 3, WeaponProperties.THROWN, WeaponProperties.VERSATILE),
 
         // SIMPLE RANGED
-        LIGHT_CROSSBOW("Light Crossbow", 25, CurrencyTypes.GOLD, WeaponAttack.D8_PIERCING, 5, WeaponProperties.AMMUNITION_BOLT, WeaponProperties.LOADING, WeaponProperties.TWO_HANDED),
-        DART("Dart", 5, CurrencyTypes.COPPER, WeaponAttack.D4_PIERCING, 0, WeaponProperties.FINESSE, WeaponProperties.THROWN),
-        SHORTBOW("Shortbow", 25, CurrencyTypes.GOLD, WeaponAttack.D6_PIERCING, 2, WeaponProperties.AMMUNITION_ARROW, WeaponProperties.TWO_HANDED),
-        SLING("Sling", 1, CurrencyTypes.SILVER, WeaponAttack.D4_BLUDGEONING, 0, WeaponProperties.AMMUNITION_STONE),
+        LIGHT_CROSSBOW("Light Crossbow", 25, CurrencyTypes.GOLD, WeaponAttack.D8_PIERCING, 5, WeaponProperties.RANGE, WeaponProperties.AMMUNITION_BOLT, WeaponProperties.LOADING, WeaponProperties.TWO_HANDED),
+        DART("Dart", 5, CurrencyTypes.COPPER, WeaponAttack.D4_PIERCING, 0, WeaponProperties.RANGE, WeaponProperties.FINESSE, WeaponProperties.THROWN),
+        SHORTBOW("Shortbow", 25, CurrencyTypes.GOLD, WeaponAttack.D6_PIERCING, 2, WeaponProperties.RANGE, WeaponProperties.AMMUNITION_ARROW, WeaponProperties.TWO_HANDED),
+        SLING("Sling", 1, CurrencyTypes.SILVER, WeaponAttack.D4_BLUDGEONING, 0, WeaponProperties.RANGE, WeaponProperties.AMMUNITION_STONE),
 
         // MARTIAL MELEE
         BATTLEAXE("Battleaxe", 10, CurrencyTypes.GOLD, WeaponAttack.D8_SLASHING, 4, WeaponProperties.VERSATILE),
@@ -68,11 +54,11 @@ public abstract class WeaponTemplates {
         WHIP("Whip", 2, CurrencyTypes.GOLD, WeaponAttack.D4_SLASHING, 3, WeaponProperties.FINESSE, WeaponProperties.REACH),
 
         // MARTIAL RANGED
-        BLOWGUN("Blowgun", 10, CurrencyTypes.GOLD, WeaponAttack.F1_PIERCING, 1, WeaponProperties.AMMUNITION_NEEDLE, WeaponProperties.LOADING),
-        HAND_CROSSBOW("Hand Crossbow", 75, CurrencyTypes.GOLD, WeaponAttack.D6_PIERCING, 3, WeaponProperties.AMMUNITION_BOLT, WeaponProperties.LIGHT, WeaponProperties.LOADING),
-        HEAVY_CROSSBOW("Heavy Crossbow", 50, CurrencyTypes.GOLD, WeaponAttack.D10_PIERCING, 18, WeaponProperties.AMMUNITION_BOLT, WeaponProperties.HEAVY, WeaponProperties.LOADING, WeaponProperties.TWO_HANDED),
-        LONGBOW("Longbow", 50, CurrencyTypes.GOLD, WeaponAttack.D8_PIERCING, 2, WeaponProperties.AMMUNITION_ARROW, WeaponProperties.HEAVY, WeaponProperties.TWO_HANDED),
-        NET("Net", 1, CurrencyTypes.GOLD, WeaponAttack.NONE, 3, WeaponProperties.SPECIAL, WeaponProperties.THROWN);
+        BLOWGUN("Blowgun", 10, CurrencyTypes.GOLD, WeaponAttack.F1_PIERCING, 1, WeaponProperties.RANGE, WeaponProperties.AMMUNITION_NEEDLE, WeaponProperties.LOADING),
+        HAND_CROSSBOW("Hand Crossbow", 75, CurrencyTypes.GOLD, WeaponAttack.D6_PIERCING, 3, WeaponProperties.RANGE, WeaponProperties.AMMUNITION_BOLT, WeaponProperties.LIGHT, WeaponProperties.LOADING),
+        HEAVY_CROSSBOW("Heavy Crossbow", 50, CurrencyTypes.GOLD, WeaponAttack.D10_PIERCING, 18, WeaponProperties.RANGE, WeaponProperties.AMMUNITION_BOLT, WeaponProperties.HEAVY, WeaponProperties.LOADING, WeaponProperties.TWO_HANDED),
+        LONGBOW("Longbow", 50, CurrencyTypes.GOLD, WeaponAttack.D8_PIERCING, 2, WeaponProperties.RANGE, WeaponProperties.AMMUNITION_ARROW, WeaponProperties.HEAVY, WeaponProperties.TWO_HANDED),
+        NET("Net", 1, CurrencyTypes.GOLD, WeaponAttack.NONE, 3, WeaponProperties.RANGE, WeaponProperties.SPECIAL, WeaponProperties.THROWN);
 
         private final String name;
         private final int currencyAmount;

@@ -4,32 +4,41 @@ import java.util.List;
 
 import com.example.adventure.entity.Entity;
 
-public class Action {
+public abstract class Action {
+    public enum ActivationCost {
+        // Unlimited
+        FREE_ACTION("Free Action"), 
+        // Standard Actions
+        MOVEMENT("Movement"), 
+        BONUS_ACTION("Bonus Action"), 
+        ACTION("Action"),
+        // Conditional Actions
+        REACTION("Reaction"), 
+        LEGENDARY_ACTION("Legendary Action"),
+        LAIR_ACTION("Lair Action");
 
+        private final String name;
+
+        ActivationCost(String name) {
+            this.name = name;
+        }
+
+        public String getName() { return this.name; }
+    }
     
-    public boolean getActionUsage() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getActionUsage'");
+    protected final String name;
+    protected final ActivationCost cost;
+
+    public Action(String name, ActivationCost cost) {
+        this.name = name;
+        this.cost = cost;
     }
 
-    public boolean getBonusActionUsage() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBonusActionUsage'");
+    public Action(String name) {
+        this(name, ActivationCost.ACTION);
     }
 
-    public boolean use(Entity entity, List<Entity> targets) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'use'");
-    }
+    public abstract boolean perform(Entity actor, List<Entity> targets);
 
-    public boolean getReactionUsage() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getReactionUsage'");
-    }
-
-    // i.e. dodging or standing up after being prone
-    public boolean getManueverUsage() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getReactionUsage'");
-    }
+    public ActivationCost getCost() { return this.cost; }
 }

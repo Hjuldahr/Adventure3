@@ -10,12 +10,12 @@ public class Item implements Comparable<Item> {
     protected int weight;
     protected String verb; // wielding / holding / bearing / etc
 
-    public Item(String name, String verb) {
+    protected Item(String name, String verb) {
         this.name = name;
         this.verb = verb;
     }
 
-    public Item(String name) {
+    protected Item(String name) {
         this(name, "holding");
     }
 
@@ -30,35 +30,15 @@ public class Item implements Comparable<Item> {
         );
     }
 
-    public String getName() {
+    protected String getName() {
         return name;
     }
 
-    public boolean requiresBoth() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'requiresBoth'");
-    }
-
-    public boolean canOff() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'canOff'");
-    }
-
-    public boolean canMain() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'canMain'");
-    }
-
-    public boolean isVersatile() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isVersatile'");
-    }
-
-    public String getVerb() {
+    protected String getVerb() {
         return verb;
     }
 
-    public ItemRarities getRarity() {
+    protected ItemRarities getRarity() {
         return rarity;
     }
 
@@ -68,31 +48,30 @@ public class Item implements Comparable<Item> {
         return this.name.compareToIgnoreCase(other.name);
     }
 
-    public int getBuyCost() {
+    protected int getBuyCost() {
         return buyCost;
     }
-    public int getSellCost() {
+    protected int getSellCost() {
         return sellCost;
     }
-    public int getWeight() {
+    protected int getWeight() {
         return weight;
     }
-
-    public boolean getIsUnsellable() {
+    protected boolean getIsUnsellable() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getIsUnsellable'");
     }
 
-    public boolean getIsIndisposable() {
+    protected boolean getIsIndisposable() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getIsIndisposable'");
     }
 
-    public boolean canAttune() {
+    protected boolean canAttune() {
         throw new UnsupportedOperationException("Unimplemented method 'canAttune'");
     }
 
-    public boolean isMagical() {
+    protected boolean isMagical() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'isMagical'");
     }

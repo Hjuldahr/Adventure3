@@ -9,6 +9,7 @@ import com.example.adventure.item.Armoury;
 import com.example.adventure.item.Inventory;
 import com.example.adventure.item.Item;
 import com.example.adventure.item.Shield;
+import com.example.adventure.item.WeaponItem;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.RollEvaluator;
 import com.example.adventure.utility.Dice.RollTypes;
@@ -146,39 +147,41 @@ public class PlayerEntity extends Entity
     public void holdItem(Item newItem) {
         if (newItem == null) return;
 
-        // 1. HEAVY: Occupies both hands physically.
-        if (newItem.requiresBoth()) {
-            stowItem(mainHand);
-            stowItem(offHand);
-            mainHand = newItem;
-            offHand = null;
-            return;
-        }
-
-        // 2. SHIELD: Strictly off-hand.
-        if (newItem.canOff() && !newItem.canMain()) {
-            // If holding a Heavy weapon, it must be stowed.
-            if (mainHand != null && mainHand.requiresBoth()) {
+        if (newItem instanceof WeaponItem weaponItem && mainHand instanceof WeaponItem mainWeaponItem) {
+            // 1. HEAVY: Occupies both hands physically.
+            if (weaponItem  .requiresBoth()) {
                 stowItem(mainHand);
-                mainHand = null;
+                stowItem(offHand);
+                mainHand = weaponItem;
+                offHand = null;
+                return;
             }
-            stowItem(offHand);
-            offHand = newItem;
-            return;
-        }
 
-        // 3. MAIN-HAND CAPABLE (Light, Other, Versatile)
-        if (newItem.canMain()) {
-            if (mainHand != null) {
-                // SHIFT: Only Light/Other (canOff) can move to the off-hand.
-                // Versatile (canMain but !canOff) will be stowed instead.
-                if (offHand == null && mainHand.canOff()) {
-                    offHand = mainHand;
-                } else {
+            // 2. SHIELD: Strictly off-hand.
+            if (weaponItem.canOff() && !weaponItem.canMain()) {
+                // If holding a Heavy weapon, it must be stowed.
+                if (mainHand != null && mainWeaponItem.requiresBoth()) {
                     stowItem(mainHand);
+                    mainHand = null;
                 }
+                stowItem(offHand);
+                offHand = weaponItem;
+                return;
             }
-            mainHand = newItem;
+
+            // 3. MAIN-HAND CAPABLE (Light, Other, Versatile)
+            if (weaponItem.canMain()) {
+                if (mainHand != null) {
+                    // SHIFT: Only Light/Other (canOff) can move to the off-hand.
+                    // Versatile (canMain but !canOff) will be stowed instead.
+                    if (offHand == null && mainWeaponItem.canOff()) {
+                        offHand = mainHand;
+                    } else {
+                        stowItem(mainHand);
+                    }
+                }
+                mainHand = weaponItem;
+            }
         }
     }
 
@@ -209,6 +212,11 @@ public class PlayerEntity extends Entity
     }
 
     public boolean attunementCheck(Armour armour) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'attunementCheck'");
+    }
+
+    public boolean attunementCheck(WeaponItem weapon) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'attunementCheck'");
     }
@@ -256,4 +264,6 @@ public class PlayerEntity extends Entity
             }
         }
     }
+
+    
 }

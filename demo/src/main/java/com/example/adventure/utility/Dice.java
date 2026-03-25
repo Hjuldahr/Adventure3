@@ -57,7 +57,7 @@ public class Dice {
     }
 
     public int rollOnce() {
-        if (sides <= 0) return 0;
+        if (count == sides) return count; // static value
         return RNG.randomInt(1, sides + 1);
     }
 
@@ -102,7 +102,12 @@ public class Dice {
         return new Dice(20);
     }
 
+    // Constants style for placeholders and edge cases (like unarmed attacks)
     public static Dice d0() {
-        return new Dice(0);
+        return new Dice(0, 0); // overides roll logic
+    }
+
+    public static Dice d1() {
+        return new Dice(1, 1); // overides roll logic
     }
 }
