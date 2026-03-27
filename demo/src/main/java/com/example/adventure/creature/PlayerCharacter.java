@@ -1,6 +1,7 @@
 package com.example.adventure.creature;
 
 import com.example.adventure.currency.CoinPurse;
+import com.example.adventure.combat.AllegianceTypes;
 import com.example.adventure.creature.Ability.AbilityTypes;
 import com.example.adventure.creature.Proficiencies.ProficiencyTiers;
 import com.example.adventure.item.Armour;
@@ -16,6 +17,10 @@ import com.example.adventure.utility.SuccessTypes;
 
 public class PlayerCharacter extends Creature
 {
+    protected int playerLevel;
+    protected PlayableRace playerRace;
+    protected PlayerClass playerClass;
+    
     private static final int BASE_AC = 10;
     private static final int DEATHSAVE_DC = 10;
     private static final int ENCUMBERANCE_MODIFIER = 10;
@@ -34,9 +39,31 @@ public class PlayerCharacter extends Creature
     private boolean performingDeathSaves = false;
 
     public PlayerCharacter(
-        String name
+        int playerLevel,
+        String name,
+        PlayableRace playerRace,
+        PlayerClass playerClass,
+        Alignment alignment,
+        Ability baseAbilities
     ) {
-        super(name);
+        super(
+            AllegianceTypes.PARTY,
+
+            name,
+            playerRace.getSizeCategory(),
+            CreatureType.HUMANOID,
+            alignment,
+            playerClass.getHitDiceForLevel(playerLevel),
+            baseAbilities,
+            new Proficiencies<AbilityTypes>(),
+            new Proficiencies<SkillTypes>(),
+            playerRace.getDamageAdjustments(),
+            playerRace.getVisionTypes(),
+            playerRace.getLanguages()
+        );
+        this.playerLevel = playerLevel;
+        this.playerClass = playerClass;
+        this.playerRace = playerRace;
     }
 
     public int getCarryLimit() {

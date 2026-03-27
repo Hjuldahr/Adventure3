@@ -23,23 +23,22 @@ import com.example.adventure.utility.SuccessTypes;
 
 public abstract class Creature //neither NPC nor PC
 {
-    protected AllegianceTypes allegiance; // friend or foe
-    
     protected String name;
     protected SizeCategory sizeCategory;
     protected CreatureType creatureType;
     protected Alignment alignment;
-
     protected Dice hitDice;
-    protected Constrained currentHP;
-    protected Constrained currentTempHP;
-
+    protected HitPoints hitPoints;
     protected Ability abilities;
     protected Proficiencies<AbilityTypes> saveProficiencies;
     protected Proficiencies<SkillTypes> skillProficiencies;
-
-    protected EnumMap<DamageTypes,DamageModifierCategories> damageModifiers;
+    protected AbilityTypes spellCastingAbilityType;
+    protected int profiencyBonus;
+    protected EnumMap<DamageTypes,DamageModifierCategories> damageAdjustments;
     protected EnumSet<VisionTypes> visionTypes;
+    protected EnumSet<Langauges> langauges;
+
+    protected AllegianceTypes allegiance; // friend or foe
 
     // player uses spell slots, npcs dont
     protected Set<Spell> usableSpells;
@@ -57,27 +56,33 @@ public abstract class Creature //neither NPC nor PC
     protected CombatEncounter combatContext = null;
 
     public Creature(
+        AllegianceTypes allegiance,
+
         String name,
         SizeCategory sizeCategory,
         CreatureType creatureType,
         Alignment alignment,
-        Dice hitDice
+        Dice hitDice,
+        Ability abilities,
+        Proficiencies<AbilityTypes> saveProficiencies,
+        Proficiencies<SkillTypes> skillProficiencies,
+        EnumMap<DamageTypes,DamageModifierCategories> damageAdjustments,
+        EnumSet<VisionTypes> visionTypes,
+        EnumSet<Langauges> langauges,
     ) {
+        this.allegiance = allegiance;
+        
         this.name = name;
         this.sizeCategory = sizeCategory;
         this.creatureType = creatureType;
         this.alignment = alignment;
-        this.hitDice = hitDice;
-        this.currentHP = new Constrained(
-            hitDice.roll(), // use max or min in hitDice constructor for instantiation behaviour
-            0, 
-            hitDice.roll(RollTypes.MAXIMUM)
-        );
-        this.currentTempHP = new Constrained(
-            0,
-            0,
-            currentHP.getMaxValue() // limited to that of max-hp for double
-        );
+        this.hitPoints = new HitPoints(hitDice);
+        this.abilities = new Ability(abilities);
+        this.saveProficiencies = new Proficiencies<>(saveProficiencies);
+        this.skillProficiencies = new Proficiencies<>(skillProficiencies);
+        this.damageAdjustments = new EnumMap<>(damageAdjustments);
+        this.visionTypes = EnumSet.copyOf(visionTypes);
+        this.langauges = EnumSet.copyOf(langauges);
     }
 
     public Creature(Creature other) {
