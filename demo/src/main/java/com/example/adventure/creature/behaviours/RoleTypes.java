@@ -1,4 +1,4 @@
-package com.example.adventure.entity.behaviours;
+package com.example.adventure.creature.behaviours;
 
 /*
  * The goal is to keep it simple and self contained

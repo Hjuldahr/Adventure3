@@ -3,7 +3,7 @@ package com.example.adventure.action;
 import java.util.Set;
 
 import com.example.adventure.combat.DamageTypes;
-import com.example.adventure.utility.Dice;
+import com.example.adventure.randomizer.Dice;
 
 public abstract class AttackAction extends Action {
     public enum AttackRange {

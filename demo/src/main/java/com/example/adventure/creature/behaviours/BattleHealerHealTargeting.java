@@ -1,20 +1,20 @@
-package com.example.adventure.entity.behaviours;
+package com.example.adventure.creature.behaviours;
 
 import java.util.Comparator;
 import java.util.List;
 
-import com.example.adventure.entity.Entity;
-import com.example.adventure.entity.NonPlayerEntity;
+import com.example.adventure.creature.Creature;
+import com.example.adventure.creature.NonPlayerCreature;
 
 public class BattleHealerHealTargeting extends HealTargeting {
     private static final float THRESHOLD = 0.5f;
 
-    public BattleHealerHealTargeting(NonPlayerEntity self) {
+    public BattleHealerHealTargeting(NonPlayerCreature self) {
         super(self);
     }
 
     @Override
-    public List<Entity> getRankedTargets() {
+    public List<Creature> getRankedTargets() {
         if (self.getHitPoints().thresholdCheck(THRESHOLD)) {
             return List.of(self);
         }

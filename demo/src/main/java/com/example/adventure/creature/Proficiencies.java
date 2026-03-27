@@ -1,4 +1,4 @@
-package com.example.adventure.entity;
+package com.example.adventure.creature;
 
 import java.util.EnumMap;
 import java.util.Objects;

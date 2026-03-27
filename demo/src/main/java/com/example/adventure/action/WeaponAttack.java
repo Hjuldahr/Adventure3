@@ -3,8 +3,8 @@ package com.example.adventure.action;
 import java.util.List;
 
 import com.example.adventure.combat.DamageTypes;
-import com.example.adventure.entity.Ability.AbilityTypes;
-import com.example.adventure.entity.Entity;
+import com.example.adventure.creature.Ability.AbilityTypes;
+import com.example.adventure.creature.Creature;
 import com.example.adventure.utility.Dice;
 
 public class WeaponAttack extends AttackAction {
@@ -16,7 +16,7 @@ public class WeaponAttack extends AttackAction {
     }
 
     @Override
-    public boolean perform(Entity actor, List<Entity> targets) {
+    public boolean perform(Creature actor, List<Creature> targets) {
         
     }
 

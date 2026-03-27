@@ -1,4 +1,4 @@
-package com.example.adventure.entity;
+package com.example.adventure.creature;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -8,79 +8,80 @@ import java.util.Set;
 import com.example.adventure.action.Action;
 import com.example.adventure.combat.AllegianceTypes;
 import com.example.adventure.combat.CombatEncounter;
-import com.example.adventure.combat.ConditionTypes;
+import com.example.adventure.combat.Conditions.ConditionTypes;
 import com.example.adventure.combat.DamageTypeHelper;
 import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
 import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.combat.SpellEffect;
-import com.example.adventure.entity.Ability.AbilityTypes;
+import com.example.adventure.creature.Ability.AbilityTypes;
+import com.example.adventure.creature.behaviours.RoleTypes;
+import com.example.adventure.randomizer.Dice;
+import com.example.adventure.randomizer.Dice.RollTypes;
 import com.example.adventure.utility.Constrained;
-import com.example.adventure.utility.Dice;
-import com.example.adventure.utility.DicePool;
 import com.example.adventure.utility.RollEvaluator;
-import com.example.adventure.utility.Dice.RollTypes;
 import com.example.adventure.utility.SuccessTypes;
 
-public abstract class Entity 
+public abstract class Creature //neither NPC nor PC
 {
-    protected int level;
+    protected AllegianceTypes allegiance; // friend or foe
+    
     protected String name;
-    protected Constrained hitPoints;
-    protected Constrained temporaryHitPoints;
-    protected Constrained spellpoints; //used by spells
+    protected SizeCategory sizeCategory;
+    protected CreatureType creatureType;
+    protected Alignment alignment;
+
+    protected Dice hitDice;
+    protected Constrained currentHP;
+    protected Constrained currentTempHP;
+
+    protected Ability abilities;
+    protected Proficiencies<AbilityTypes> saveProficiencies;
+    protected Proficiencies<SkillTypes> skillProficiencies;
+
+    protected EnumMap<DamageTypes,DamageModifierCategories> damageModifiers;
+    protected EnumSet<VisionTypes> visionTypes;
+
+    // player uses spell slots, npcs dont
+    protected Set<Spell> usableSpells;
 
     protected boolean hasAction = true;
     protected boolean hasBonusAction = true;
     protected boolean hasReaction = true;
     protected boolean hasManueverAction = true;
 
-    protected EnumMap<DamageTypes,DamageModifierCategories> damageModifiers;
-    
-    protected int profiencyBonus;
-
-    protected Ability abilities;
-    protected SkillTypes skills;
-    protected AbilityTypes spellCastingAbilityType;
-
-    protected SpellEffect concentrationEffect; 
-
     protected Set<ConditionTypes> activeConditions;
     protected Set<SpellEffect> activeSpellEffects;
-
-    protected AllegianceTypes allegiance;
-    protected boolean hasSurrendered = false;
-    protected int initiativeCount = 1;
-    protected boolean hasInitiativeAdvantage = false;
-
-    protected Proficiencies<AbilityTypes> saveProficiencies;
-    protected Proficiencies<SkillTypes> skillProficiencies;
 
     protected int totalDamageDealtThisEncounter = 0;
     protected int totalHealingGivenThisEncounter = 0;
     protected CombatEncounter combatContext = null;
 
-    protected DicePool hitDice;
-
-    protected SizeCategory sizeCategory;
-
-    public Entity(
+    public Creature(
         String name,
-        AllegianceTypes allegiance,
-        DicePool hitDice,
-        int initialHitPoints
+        SizeCategory sizeCategory,
+        CreatureType creatureType,
+        Alignment alignment,
+        Dice hitDice
     ) {
         this.name = name;
-        this.allegiance = allegiance;
-
-        // TODO derive from ability scores
-
+        this.sizeCategory = sizeCategory;
+        this.creatureType = creatureType;
+        this.alignment = alignment;
         this.hitDice = hitDice;
-        this.hitPoints = new Constrained(0, initialHitPoints);
-        this.spellpoints = new Constrained(0, 999);
+        this.currentHP = new Constrained(
+            hitDice.roll(), // use max or min in hitDice constructor for instantiation behaviour
+            0, 
+            hitDice.roll(RollTypes.MAXIMUM)
+        );
+        this.currentTempHP = new Constrained(
+            0,
+            0,
+            currentHP.getMaxValue() // limited to that of max-hp for double
+        );
     }
 
-    public Entity(Entity other) {
-        this(other.name, other.allegiance, other.hitDice, other.hitPoints.getValue());
+    public Creature(Creature other) {
+        
     }
 
     /**
@@ -199,7 +200,7 @@ public abstract class Entity
         }
     }
 
-    public void performAction(Action action, List<Entity> targets) {
+    public void performAction(Action action, List<Creature> targets) {
         boolean usesAction = action.getActionUsage();
         boolean usesBonusAction = action.getBonusActionUsage();
 
@@ -219,7 +220,7 @@ public abstract class Entity
         }
     }
 
-    public void performReaction(Action reaction, List<Entity> targets) {
+    public void performReaction(Action reaction, List<Creature> targets) {
         boolean usesReaction = reaction.getReactionUsage();
 
         if (usesReaction && !hasReaction) {
@@ -373,8 +374,8 @@ public abstract class Entity
         combatContext.setPosition(this, false);
     }
 
-    protected abstract void attemptAttack(List<Entity> targets);
-    protected abstract boolean attemptHeal(List<Entity> targets);
+    protected abstract void attemptAttack(List<Creature> targets);
+    protected abstract boolean attemptHeal(List<Creature> targets);
 
     public boolean hasCondition(ConditionTypes c) {
         return activeConditions.contains(c);

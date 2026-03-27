@@ -79,7 +79,7 @@ public class CyclicList<T> {
 
     public void removeAt(Integer index) {
         elements.remove(index);
-        // Remove all time-slots for this entity
+        // Remove all time-slots for this creature
         indices.removeIf(e -> e.equals(index));
         
         // 3. Safety Check: If the list is now shorter than the pointer, reset it

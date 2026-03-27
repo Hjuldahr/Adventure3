@@ -1,10 +1,10 @@
-package com.example.adventure.entity;
+package com.example.adventure.creature;
 
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.example.adventure.entity.Proficiencies.ProficiencyTiers;
+import com.example.adventure.creature.Proficiencies.ProficiencyTiers;
 
 public class Ability {
     public static final int MAXIMUM = 30;

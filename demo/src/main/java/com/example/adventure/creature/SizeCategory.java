@@ -1,4 +1,4 @@
-package com.example.adventure.entity;
+package com.example.adventure.creature;
 
 public enum SizeCategory {
     TINY("Tiny"),
@@ -17,7 +17,7 @@ public enum SizeCategory {
         return name;
     }
     /**
-     * Return positive if large then othe entity. 
+     * Return positive if large then othe creature. 
      * Return negative if smaller. 
      * Return 0 if identical.
      * Absolute value indicates magnitude of difference.

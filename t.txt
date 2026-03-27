@@ -1,11 +1,11 @@
 package com.example.adventure.action;
 
-import com.example.adventure.entity.Entity;
+import com.example.adventure.creature.Creature;
 
 import java.util.List;
 
 import com.example.adventure.action.DamageType.DamageTypes;
-import com.example.adventure.entity.AbilityScores.AbilityCategories;
+import com.example.adventure.creature.AbilityScores.AbilityCategories;
 import com.example.adventure.utility.Dice;
 import com.example.adventure.utility.DicePool;
 import com.example.adventure.utility.Success;
@@ -72,7 +72,7 @@ public abstract class Spell {
     }
 
     // Assumes enemies vs allies will be correctly picked for heals vs attacks
-    public void use(Entity caster, List<Entity> targets) {
+    public void use(Creature caster, List<Creature> targets) {
         if (requiresConcentration) {
             // automatically breaks previous spell concentration
             caster.setConcentratedSpell(this);
@@ -95,7 +95,7 @@ public abstract class Spell {
     }
 
     // summons are unique as it requires instantiating transient (per encounter) entites
-    private void applyPerTarget(Entity caster, Entity target) {
+    private void applyPerTarget(Creature caster, Creature target) {
         switch (categoryType) {
             case ATTACK: // spell attack check
                 attackTarget(caster, target);
@@ -131,7 +131,7 @@ public abstract class Spell {
     }
 
     // For attack spells (firebolt)
-    private boolean attackTarget(Entity caster, Entity target) {
+    private boolean attackTarget(Creature caster, Creature target) {
         int raw = Dice.d20();
         int result = raw + caster.getSpellCastingModifier() + caster.getProfiencyBonus();
         
@@ -159,7 +159,7 @@ public abstract class Spell {
     }
 
     // For auto hit spells (magic missile)
-    private void harmTarget(Entity caster, Entity target) {
+    private void harmTarget(Creature caster, Creature target) {
         int damage = dicePool.rollAll();
         target.applyDamage(damage, damageType); // internally calculate resistance, immunity, vulnerability
 
@@ -174,7 +174,7 @@ public abstract class Spell {
     }
 
     // For AoEs (fireball)
-    private void saturateTarget(Entity caster, Entity target) {
+    private void saturateTarget(Creature caster, Creature target) {
         float damageModifier = 1f;
         
         // for the attack
@@ -207,7 +207,7 @@ public abstract class Spell {
         }
     }
 
-    private void healTarget(Entity caster, Entity target) {
+    private void healTarget(Creature caster, Creature target) {
         int raw = Dice.d20();
         
         if (raw == 1) return;
@@ -225,19 +225,19 @@ public abstract class Spell {
         }
     }
 
-    private void wardTarget(Entity caster, Entity target) {
+    private void wardTarget(Creature caster, Creature target) {
         if (effect != null) {
             target.applyEffect(effect);
         }
     }
 
-    private void blessTarget(Entity caster, Entity target) {
+    private void blessTarget(Creature caster, Creature target) {
         if (effect != null) {
             target.applyEffect(effect);
         }
     }
 
-    private void curseTarget(Entity caster, Entity target) {
+    private void curseTarget(Creature caster, Creature target) {
         int difficultyClass = caster.getSpellSaveDifficulty();
         if (!target.simpleSaveCheck(difficultyClass, saveType)) return;
         

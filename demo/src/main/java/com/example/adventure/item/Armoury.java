@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import com.example.adventure.entity.PlayerEntity;
+import com.example.adventure.creature.PlayerCharacter;
 import com.example.adventure.item.WeaponItem.WeaponProperties;
-import com.example.adventure.entity.Ability.AbilityTypes;
+import com.example.adventure.creature.Ability.AbilityTypes;
 import com.example.adventure.utility.Colours;
 
 public class Armoury {
@@ -21,7 +21,7 @@ public class Armoury {
     private TreeSet<Armour> armours;
     private TreeSet<Shield> shields;
     
-    public void viewStoredWeapon(PlayerEntity player) {
+    public void viewStoredWeapon(PlayerCharacter player) {
         ItemRarities previousCategory = null;
 
         for (WeaponItem weapon : weapons) {
@@ -80,7 +80,7 @@ public class Armoury {
         }
     }
 
-    public void viewStoredArmour(PlayerEntity player) {
+    public void viewStoredArmour(PlayerCharacter player) {
         ItemRarities previousCategory = null;
 
         for (Armour armour : armours) {

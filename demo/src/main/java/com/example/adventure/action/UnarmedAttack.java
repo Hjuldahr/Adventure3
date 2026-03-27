@@ -3,9 +3,10 @@ package com.example.adventure.action;
 import java.util.List;
 
 import com.example.adventure.combat.DamageTypes;
-import com.example.adventure.entity.Entity;
-import com.example.adventure.entity.Ability.AbilityTypes;
-import com.example.adventure.utility.Dice;
+import com.example.adventure.creature.Creature;
+import com.example.adventure.creature.Ability.AbilityTypes;
+import com.example.adventure.randomizer.Dice;
+import com.example.adventure.randomizer.Dice.RollType;
 
 public class UnarmedAttack extends AttackAction {
 
@@ -14,7 +15,7 @@ public class UnarmedAttack extends AttackAction {
     public UnarmedAttack() {
         super(
             "Unarmed Strike", 
-            Dice.d1(), DamageTypes.BLUDGEONING, 
+            Dice.parse("1"), DamageTypes.BLUDGEONING, 
             AttackRange.MELEE
         );
         this.abilityType = AbilityTypes.BRAWN;
@@ -37,12 +38,12 @@ public class UnarmedAttack extends AttackAction {
     }
 
     @Override
-    public boolean perform(Entity actor, List<Entity> targets) {
+    public boolean perform(Creature actor, List<Creature> targets) {
         if (targets == null || targets.isEmpty()) return false;
-        Entity target = targets.getFirst();
+        Creature target = targets.getFirst();
 
         // 1. Attack Roll
-        int rawAttackRoll = Dice.rollD20();
+        int rawAttackRoll = Dice.D20();
         int attackMod = actor.getAbilityModifier(abilityType);
         int profBonus = actor.getProfiencyBonus();
         int totalAttack = rawAttackRoll + attackMod + profBonus;
@@ -56,7 +57,7 @@ public class UnarmedAttack extends AttackAction {
         DamagePoolRecord dpr = damagePool.iterator().next();
         Dice damageDice = dpr.damageDice();
         
-        int damageResult = (rawAttackRoll == 20 ? damageDice.rollMax() : damageDice.roll()) + attackMod;
+        int damageResult = (rawAttackRoll == 20 ? damageDice.roll(RollType.MAXIMUM) : damageDice.roll()) + attackMod;
 
         int finalDamage = Math.max(0, damageResult);
 

@@ -1,17 +1,17 @@
 package com.example.adventure.combat;
 
 import com.example.adventure.action.spells.Spell;
-import com.example.adventure.entity.Entity;
+import com.example.adventure.creature.Creature;
 
 public class SpellEffect {
     private final Spell spell;
-    private final Entity caster;
-    private final Entity target;
+    private final Creature caster;
+    private final Creature target;
     private final Condition condition;
 
     private int duration;
 
-    public SpellEffect(Spell spell, Entity caster, Entity target, Condition condition, int duration) {
+    public SpellEffect(Spell spell, Creature caster, Creature target, Condition condition, int duration) {
         this.spell = spell;
         this.caster = caster;
         this.target = target;
@@ -19,7 +19,7 @@ public class SpellEffect {
         this.duration = duration;
     }
 
-    public SpellEffect(Spell spell, Entity caster, Entity target, Condition condition) {
+    public SpellEffect(Spell spell, Creature caster, Creature target, Condition condition) {
         this(spell, caster, target, condition, 0);
     }
 
@@ -60,7 +60,7 @@ public class SpellEffect {
         return spell;
     }
 
-    public Entity target() {
+    public Creature target() {
         return target;
     }
 }

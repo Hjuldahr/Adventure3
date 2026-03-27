@@ -1,28 +1,28 @@
-package com.example.adventure.entity;
+package com.example.adventure.creature;
 
 import java.util.List;
 
 import com.example.adventure.combat.AllegianceTypes;
 import com.example.adventure.combat.ConditionTypes;
-import com.example.adventure.entity.behaviours.AssassinAttackTargeting;
-import com.example.adventure.entity.behaviours.BattleHealerHealTargeting;
-import com.example.adventure.entity.behaviours.BerzerkerAttackTargeting;
-import com.example.adventure.entity.behaviours.HunterAttackTargeting;
-import com.example.adventure.entity.behaviours.NoAttackTargeting;
-import com.example.adventure.entity.behaviours.NoHealTargeting;
-import com.example.adventure.entity.behaviours.RoleTypes;
-import com.example.adventure.entity.behaviours.SlayerAttackTargeting;
-import com.example.adventure.entity.behaviours.SupportHealerHealTargeting;
-import com.example.adventure.entity.behaviours.Targeting;
+import com.example.adventure.creature.behaviours.AssassinAttackTargeting;
+import com.example.adventure.creature.behaviours.BattleHealerHealTargeting;
+import com.example.adventure.creature.behaviours.BerzerkerAttackTargeting;
+import com.example.adventure.creature.behaviours.HunterAttackTargeting;
+import com.example.adventure.creature.behaviours.NoAttackTargeting;
+import com.example.adventure.creature.behaviours.NoHealTargeting;
+import com.example.adventure.creature.behaviours.RoleTypes;
+import com.example.adventure.creature.behaviours.SlayerAttackTargeting;
+import com.example.adventure.creature.behaviours.SupportHealerHealTargeting;
+import com.example.adventure.creature.behaviours.Targeting;
 
-public abstract class NonPlayerEntity extends Entity
+public abstract class NonPlayerCreature extends Creature
 {
     private int armourClass;
     protected RoleTypes role;
     private Targeting attackTargeting;
     private Targeting healTargeting;
     
-    public NonPlayerEntity(
+    public NonPlayerCreature(
         String name,
         RoleTypes role,
         AllegianceTypes allegiance
@@ -44,7 +44,7 @@ public abstract class NonPlayerEntity extends Entity
         };
     }
 
-    public NonPlayerEntity(NonPlayerEntity other) {
+    public NonPlayerCreature(NonPlayerCreature other) {
         super(other);
         this.role = other.role;
         this.attackTargeting = other.attackTargeting;
@@ -68,7 +68,7 @@ public abstract class NonPlayerEntity extends Entity
             this.hasManueverAction = false;
         }
 
-        List<Entity> targets = healTargeting.getRankedTargets();
+        List<Creature> targets = healTargeting.getRankedTargets();
 
         if (!targets.isEmpty()) {
             // TODO check healing range if needed later

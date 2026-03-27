@@ -4,24 +4,66 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 public class Dice {
-    public enum RollType {
-        STANDARD, MINIMUM, MAXIMUM, KEEP_HIGHEST, KEEP_LOWEST
+    public enum RollTypes {
+        STANDARD, MINIMUM, MAXIMUM, KEEP_HIGHEST, KEEP_LOWEST, FIXED
     }
     
     private final int diceCount;
     private final int diceSides;
     private final int diceModifier;
-    private final RollType rollType;
+    private final RollTypes rollType;
 
-    public Dice(int diceCount, int diceSides, int diceModifier, RollType rollType) {
+    /**
+     * Example d4 -> Dice(4)
+     * @param diceSides
+     */
+    public Dice(int diceSides) {
+        this(1, diceSides, 0, RollTypes.STANDARD);
+    }
+    /**
+     * Example 2d4 -> Dice(2, 4)
+     * @param diceCount
+     * @param diceSides
+     */
+    public Dice(int diceCount, int diceSides) {
+        this(diceCount, diceSides, 0, RollTypes.STANDARD);
+    }
+    /**
+     * Example 2d4+1 -> Dice(2, 4, 1)
+     * @param diceCount
+     * @param diceSides
+     * @param diceModifier
+     */
+    public Dice(int diceCount, int diceSides, int diceModifier) {
+        this(diceCount, diceSides, diceModifier, RollTypes.STANDARD);
+    }
+    /**
+     * Example 2d20 kh -> Dice(2, 4, 1, RollTypes.KEEP_HIGHEST)
+     * @param diceCount
+     * @param diceSides
+     * @param diceModifier
+     * @param rollType
+     */
+    public Dice(int diceCount, int diceSides, int diceModifier, RollTypes rollType) {
         this.diceCount = diceCount;
         this.diceSides = diceSides;
         this.diceModifier = diceModifier;
         this.rollType = rollType;
     }
 
+    /**
+     * Cloning constructor
+     * @param other
+     */
+    public Dice(Dice other) {
+        this(other.diceCount, other.diceSides, other.diceModifier, other.rollType);
+    }
+
     public int getCount() { return this.diceCount; }
     public int getSides() { return this.diceSides; }
+    public int getModifier() { return this.diceModifier; }
+    public RollTypes getRollTypes() { return this.rollType; }
+
     /**
      * Rolls dynamically, using default formula modifier
      * @return
@@ -34,8 +76,9 @@ public class Dice {
      * @param rollType
      * @return
      */
-    public int roll(RollType rollTypeOverride) {
+    public int roll(RollTypes rollTypeOverride) {
         return switch (rollTypeOverride) {
+            case FIXED -> 0; // modifier only
             case STANDARD -> rawRolls().sum();
             case MINIMUM -> this.diceCount;
             case MAXIMUM -> this.diceCount * this.diceSides;
@@ -55,7 +98,6 @@ public class Dice {
      * @return
      */
     public int rawRoll() {
-        // d1 -> 1, d0 -> 0
         if (this.diceSides <= 1) return this.diceSides;
         return getCurrent().nextInt(this.diceSides) + 1;
     }
@@ -72,26 +114,31 @@ public class Dice {
         return string;
     }
     public static Dice parse(String formula) {
-        RollType rollType = RollType.STANDARD;
+        if (!formula.contains("d")) {
+            int value = Integer.parseInt(formula);
+            return new Dice(0, 0, value, RollTypes.FIXED);
+        }
+        
+        RollTypes rollType = RollTypes.STANDARD;
         
         // min 2d10+1 -> 2+1 -> 3
         if (formula.startsWith("min ")) {
-            rollType = RollType.MINIMUM;
+            rollType = RollTypes.MINIMUM;
             formula = removePrefix("min ", formula); //formula.substring(4);
         }
         // max 2d10+1 -> 2*10+1 -> 21
         else if (formula.startsWith("max ")) {
-            rollType = RollType.MAXIMUM;
+            rollType = RollTypes.MAXIMUM;
             formula = removePrefix("max ", formula);
         }
         // 2d10+1 kh -> max(3,9)+1 -> 10
         else if (formula.endsWith(" kh")) {
-            rollType = RollType.KEEP_HIGHEST;
+            rollType = RollTypes.KEEP_HIGHEST;
             formula = removeSuffix(formula, " kh");
         }
         // 2d10+1 kl -> min(3,9)+1 -> 4
         else if (formula.endsWith(" kl")) {
-            rollType = RollType.KEEP_LOWEST;
+            rollType = RollTypes.KEEP_LOWEST;
             formula = removeSuffix(formula, " kl");
         }
         // d4 -> 1d4
@@ -135,6 +182,8 @@ public class Dice {
 
     @Override
     public String toString() { 
+        if (rollType == RollTypes.FIXED) return String.valueOf(diceModifier);
+
         String prefix = switch (rollType) {
             case MINIMUM -> "min ";
             case MAXIMUM -> "max ";

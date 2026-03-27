@@ -2,7 +2,7 @@ package com.example.adventure.action;
 
 import java.util.List;
 
-import com.example.adventure.entity.Entity;
+import com.example.adventure.creature.Creature;
 
 public abstract class Action {
     public enum ActivationCost {
@@ -38,7 +38,7 @@ public abstract class Action {
         this(name, ActivationCost.ACTION);
     }
 
-    public abstract boolean perform(Entity actor, List<Entity> targets);
+    public abstract boolean perform(Creature actor, List<Creature> targets);
 
     public ActivationCost getCost() { return this.cost; }
 }

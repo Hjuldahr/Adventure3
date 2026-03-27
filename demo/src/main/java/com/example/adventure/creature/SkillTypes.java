@@ -1,9 +1,9 @@
-package com.example.adventure.entity;
+package com.example.adventure.creature;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
 
-import com.example.adventure.entity.Ability.AbilityTypes;
+import com.example.adventure.creature.Ability.AbilityTypes;
 
 public enum SkillTypes {
     ATHLETICS("Athletics", AbilityTypes.BRAWN),

@@ -1,22 +1,20 @@
-package com.example.adventure.entity;
+package com.example.adventure.creature;
 
 import com.example.adventure.currency.CoinPurse;
-import com.example.adventure.entity.Ability.AbilityTypes;
-import com.example.adventure.entity.Proficiencies.ProficiencyTiers;
-import com.example.adventure.entity.Skills.SkillTypes;
+import com.example.adventure.creature.Ability.AbilityTypes;
+import com.example.adventure.creature.Proficiencies.ProficiencyTiers;
 import com.example.adventure.item.Armour;
 import com.example.adventure.item.Armoury;
 import com.example.adventure.item.Inventory;
 import com.example.adventure.item.Item;
 import com.example.adventure.item.Shield;
 import com.example.adventure.item.WeaponItem;
-import com.example.adventure.utility.Dice;
+import com.example.adventure.randomizer.Dice;
 import com.example.adventure.utility.RollEvaluator;
-import com.example.adventure.utility.Dice.RollTypes;
 import com.example.adventure.utility.Success;
 import com.example.adventure.utility.SuccessTypes;
 
-public class PlayerEntity extends Entity
+public class PlayerCharacter extends Creature
 {
     private static final int BASE_AC = 10;
     private static final int DEATHSAVE_DC = 10;
@@ -35,7 +33,7 @@ public class PlayerEntity extends Entity
     private int failedDeathSaves = 0;
     private boolean performingDeathSaves = false;
 
-    public PlayerEntity(
+    public PlayerCharacter(
         String name
     ) {
         super(name);
@@ -67,7 +65,7 @@ public class PlayerEntity extends Entity
     }
 
     private void performDeathSave() {
-        int raw = Dice.d20(RollTypes.STANDARD);
+        int raw = Dice.D20();
         SuccessTypes successType = RollEvaluator.evaluate(raw, raw, DEATHSAVE_DC);
 
         switch (successType) {
@@ -228,7 +226,7 @@ public class PlayerEntity extends Entity
         if (performingDeathSaves) {
             failedDeathSaves += isCritical ? 2 : 1;
         } else {
-            performingDeathSaves = hitpoints.atMinimum();
+            performingDeathSaves = hitpoints.atMinimum(); // 0 hitpoints
         }
     }
 

@@ -1,4 +1,4 @@
-package com.example.adventure.entity.behaviours;
+package com.example.adventure.creature.behaviours;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,18 +6,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.example.adventure.entity.Entity;
-import com.example.adventure.entity.NonPlayerEntity;
+import com.example.adventure.creature.Creature;
+import com.example.adventure.creature.NonPlayerCreature;
 
 public class BerzerkerAttackTargeting extends AttackTargeting {
-    public BerzerkerAttackTargeting(NonPlayerEntity self) {
+    public BerzerkerAttackTargeting(NonPlayerCreature self) {
         super(self);
     }
 
     @Override
-    public List<Entity> getRankedTargets() {
+    public List<Creature> getRankedTargets() {
         HashMap<Long, Float> aggroMap = new HashMap<>(self.getAggroMap());
-        HashMap<Long, Entity> validTargets = new HashMap<>(getValidTargets());
+        HashMap<Long, Creature> validTargets = new HashMap<>(getValidTargets());
         
         if (aggroMap.isEmpty()) {
             return rankRandomly();
