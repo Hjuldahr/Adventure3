@@ -15,6 +15,7 @@ import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.combat.SpellEffect;
 import com.example.adventure.creature.Ability.AbilityTypes;
 import com.example.adventure.creature.behaviours.RoleTypes;
+import com.example.adventure.item.WeaponTemplates.WeaponTypes;
 import com.example.adventure.randomizer.Dice;
 import com.example.adventure.randomizer.Dice.RollTypes;
 import com.example.adventure.utility.Constrained;
@@ -32,6 +33,7 @@ public abstract class Creature //neither NPC nor PC
     protected Ability abilities;
     protected Proficiencies<AbilityTypes> saveProficiencies;
     protected Proficiencies<SkillTypes> skillProficiencies;
+    protected Proficiencies<WeaponTypes> weaponProficiencies;
     protected AbilityTypes spellCastingAbilityType;
     protected int profiencyBonus;
     protected EnumMap<DamageTypes,DamageModifierCategories> damageAdjustments;
@@ -68,7 +70,7 @@ public abstract class Creature //neither NPC nor PC
         Proficiencies<SkillTypes> skillProficiencies,
         EnumMap<DamageTypes,DamageModifierCategories> damageAdjustments,
         EnumSet<VisionTypes> visionTypes,
-        EnumSet<Langauges> langauges,
+        EnumSet<Langauges> langauges
     ) {
         this.allegiance = allegiance;
         
@@ -119,11 +121,23 @@ public abstract class Creature //neither NPC nor PC
         return attackRoll >= getArmourClass();
     }
 
-    public int getProfiencyBonus() {
+    public int getFlatProfiencyBonus() {
         return profiencyBonus;
     }
 
-    public Constrained getHitPoints() { return hitPoints; }
+    public int getProfiencyBonus(SkillTypes skillType) {
+        return skillProficiencies.getBonusValue(skillType, profiencyBonus);
+    }
+
+    public int getProfiencyBonus(AbilityTypes saveType) {
+        return saveProficiencies.getBonusValue(saveType, profiencyBonus);
+    }
+
+    public int getProfiencyBonus(WeaponTypes weaponType) {
+        return weaponProficiencies.getBonusValue(weaponType, profiencyBonus);
+    }
+
+    public HitPoints getHitPoints() { return hitPoints; }
 
     public int getSaveModifier(AbilityTypes saveType) {
         int abilityMod = abilities.getAbilityModifier(saveType);
@@ -138,21 +152,21 @@ public abstract class Creature //neither NPC nor PC
     }
 
     public boolean simpleSaveCheck(int difficultyClass, AbilityTypes saveType, RollTypes rollType) {
-        int raw = Dice.d20(rollType);
+        int raw = Dice.D20(rollType);
         int result = raw + getSaveModifier(saveType);
         SuccessTypes success = RollEvaluator.evaluate(raw, result, difficultyClass);
         return success == SuccessTypes.CRIT_SUCCESS || success == SuccessTypes.SUCCESS;
     }
 
     public ResultRecord saveCheck(int difficultyClass, AbilityTypes saveType, RollTypes rollType) {
-        int raw = Dice.d20(rollType);
+        int raw = Dice.D20(rollType);
         int result = raw + getSaveModifier(saveType); // includes profiency
         SuccessTypes degree = RollEvaluator.evaluate(raw, result, difficultyClass);
         return new ResultRecord(degree, raw, result, rollType);
     }
 
     public ResultRecord skillCheck(int difficultyClass, SkillTypes skillType, RollTypes rollType) {
-        int raw = Dice.d20(rollType);
+        int raw = Dice.D20(rollType);
         int result = raw + getSkillModifier(skillType); // includes profiency
         SuccessTypes successType = RollEvaluator.evaluate(raw, result, difficultyClass);
         return new ResultRecord(successType, raw, result, rollType);
@@ -190,15 +204,15 @@ public abstract class Creature //neither NPC nor PC
         }
     }
 
-    public void applyDamage(int damage, DamageTypes damageType) {
+    public void takeDamage(int damage, DamageTypes damageType, boolean wasCritical, Creature attacker) {
         float modifier = getDamageModifier(damageType);
         int adjustedDamage = Math.round(damage * modifier);
         
         if (adjustedDamage <= 0) return;
 
-        hitPoints.decrease(adjustedDamage);
+        hitPoints.takeDamage(adjustedDamage);
         
-        if (hitPoints.atMinimum()) {
+        if (hitPoints.atZero()) {
             breakConcentration();
         } else if (concentrationEffect != null) {
             concentrationCheck(adjustedDamage, damageType);
@@ -363,7 +377,6 @@ public abstract class Creature //neither NPC nor PC
 
     public abstract boolean isMeleeOnly();
     protected abstract boolean isRangedOnly();
-
     public abstract boolean hasReachAttacks();
 
     public boolean isInFrontLine() {

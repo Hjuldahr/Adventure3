@@ -6,12 +6,10 @@ import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.creature.Creature;
 import com.example.adventure.creature.Ability.AbilityTypes;
 import com.example.adventure.randomizer.Dice;
-import com.example.adventure.randomizer.Dice.RollType;
+import com.example.adventure.randomizer.Dice.RollTypes;
 
 public class UnarmedAttack extends AttackAction {
 
-    protected AbilityTypes abilityType;
-    
     public UnarmedAttack() {
         super(
             "Unarmed Strike", 
@@ -57,11 +55,11 @@ public class UnarmedAttack extends AttackAction {
         DamagePoolRecord dpr = damagePool.iterator().next();
         Dice damageDice = dpr.damageDice();
         
-        int damageResult = (rawAttackRoll == 20 ? damageDice.roll(RollType.MAXIMUM) : damageDice.roll()) + attackMod;
+        int damageResult = (rawAttackRoll == 20 ? damageDice.roll(RollTypes.MAXIMUM) : damageDice.roll()) + attackMod;
 
         int finalDamage = Math.max(0, damageResult);
 
-        target.applyDamage(finalDamage, dpr.damageType());
+        target.takeDamage(finalDamage, dpr.damageType(), rawAttackRoll == 20, actor);
         return true;
     }
 }

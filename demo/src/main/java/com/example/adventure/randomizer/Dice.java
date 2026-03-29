@@ -5,45 +5,18 @@ import java.util.stream.IntStream;
 
 public class Dice {
     public enum RollTypes {
-        STANDARD, MINIMUM, MAXIMUM, KEEP_HIGHEST, KEEP_LOWEST, FIXED
+        STANDARD, MINIMUM, AVERAGE, MAXIMUM, KEEP_HIGHEST, KEEP_LOWEST, FIXED
     }
-    
+
     private final int diceCount;
     private final int diceSides;
     private final int diceModifier;
     private final RollTypes rollType;
 
-    /**
-     * Example d4 -> Dice(4)
-     * @param diceSides
-     */
-    public Dice(int diceSides) {
-        this(1, diceSides, 0, RollTypes.STANDARD);
-    }
-    /**
-     * Example 2d4 -> Dice(2, 4)
-     * @param diceCount
-     * @param diceSides
-     */
-    public Dice(int diceCount, int diceSides) {
-        this(diceCount, diceSides, 0, RollTypes.STANDARD);
-    }
-    /**
-     * Example 2d4+1 -> Dice(2, 4, 1)
-     * @param diceCount
-     * @param diceSides
-     * @param diceModifier
-     */
-    public Dice(int diceCount, int diceSides, int diceModifier) {
-        this(diceCount, diceSides, diceModifier, RollTypes.STANDARD);
-    }
-    /**
-     * Example 2d20 kh -> Dice(2, 4, 1, RollTypes.KEEP_HIGHEST)
-     * @param diceCount
-     * @param diceSides
-     * @param diceModifier
-     * @param rollType
-     */
+    public Dice(int diceSides) { this(1, diceSides, 0, RollTypes.STANDARD); }
+    public Dice(int diceCount, int diceSides) { this(diceCount, diceSides, 0, RollTypes.STANDARD); }
+    public Dice(int diceCount, int diceSides, int diceModifier) { this(diceCount, diceSides, diceModifier, RollTypes.STANDARD); }
+
     public Dice(int diceCount, int diceSides, int diceModifier, RollTypes rollType) {
         this.diceCount = diceCount;
         this.diceSides = diceSides;
@@ -51,158 +24,121 @@ public class Dice {
         this.rollType = rollType;
     }
 
-    /**
-     * Cloning constructor
-     * @param other
-     */
     public Dice(Dice other) {
         this(other.diceCount, other.diceSides, other.diceModifier, other.rollType);
     }
 
-    public int getCount() { return this.diceCount; }
-    public int getSides() { return this.diceSides; }
-    public int getModifier() { return this.diceModifier; }
-    public RollTypes getRollTypes() { return this.rollType; }
+    // Getters
+    public int getCount() { return diceCount; }
+    public int getSides() { return diceSides; }
+    public int getModifier() { return diceModifier; }
+    public RollTypes getRollTypes() { return rollType; }
 
-    /**
-     * Rolls dynamically, using default formula modifier
-     * @return
-     */
-    public int roll() {
-        return roll(this.rollType);
+    public int roll() { return roll(this.rollType); }
+
+    public int roll(RollTypes override) {
+        return switch (override) {
+            case FIXED -> diceModifier;
+            case STANDARD -> getStandard();
+            case MINIMUM -> getMinimum();
+            case AVERAGE -> getAverage();
+            case MAXIMUM -> getMaximum();
+            case KEEP_LOWEST -> getLowest();
+            case KEEP_HIGHEST -> getHighest();
+        };
     }
-    /**
-     * Rolls dynamically, using overriden formula modifier
-     * @param rollType
-     * @return
-     */
-    public int roll(RollTypes rollTypeOverride) {
-        return switch (rollTypeOverride) {
-            case FIXED -> 0; // modifier only
-            case STANDARD -> rawRolls().sum();
-            case MINIMUM -> this.diceCount;
-            case MAXIMUM -> this.diceCount * this.diceSides;
-            case KEEP_LOWEST -> rawRolls().min().orElse(0);
-            case KEEP_HIGHEST -> rawRolls().max().orElse(0);
-        } + diceModifier;
+
+    public int getStandard() {
+        return rawRolls().sum() + diceModifier;
     }
-    /**
-     * Rolls multiple times
-     * @return
-     */
+
+    public int getLowest() {
+        return rawRolls().min().orElse(0) + diceModifier;
+    }
+
+    public int getHighest() {
+        return rawRolls().max().orElse(0) + diceModifier;
+    }
+
+    public int getAverage() {
+        return Math.floorDiv(this.diceCount * (this.diceSides + 1), 2) + this.diceModifier;
+    }
+
+    public int getMaximum() {
+        return (diceCount * diceSides) + diceModifier;
+    }
+
+    public int getMinimum() {
+        return diceCount + diceModifier;
+    }
+
+    private int rawRoll() {
+        if (diceSides <= 1) return diceSides;
+        return ThreadLocalRandom.current().nextInt(diceSides) + 1;
+    }
+
     public IntStream rawRolls() {
-        return IntStream.range(0, this.diceCount).map(i -> rawRoll());
+        return IntStream.generate(this::rawRoll).limit(diceCount);
     }
-    /**
-     * Rolls once
-     * @return
-     */
-    public int rawRoll() {
-        if (this.diceSides <= 1) return this.diceSides;
-        return getCurrent().nextInt(this.diceSides) + 1;
-    }
-    private static String removePrefix(String prefix, String string) {
-        if (string != null && prefix != null && string.startsWith(prefix)) {
-            return string.substring(prefix.length());
-        }
-        return string;
-    }
-    private static String removeSuffix(String string, String suffix) {
-        if (string != null && suffix != null && string.endsWith(suffix)) { //
-            return string.substring(0, string.length() - suffix.length()); //
-        }
-        return string;
-    }
+
     public static Dice parse(String formula) {
+        formula = formula.toLowerCase().trim();
+        RollTypes type = RollTypes.STANDARD;
+
         if (!formula.contains("d")) {
-            int value = Integer.parseInt(formula);
-            return new Dice(0, 0, value, RollTypes.FIXED);
+            return new Dice(0, 0, Integer.parseInt(formula), RollTypes.FIXED);
         }
-        
-        RollTypes rollType = RollTypes.STANDARD;
-        
-        // min 2d10+1 -> 2+1 -> 3
-        if (formula.startsWith("min ")) {
-            rollType = RollTypes.MINIMUM;
-            formula = removePrefix("min ", formula); //formula.substring(4);
-        }
-        // max 2d10+1 -> 2*10+1 -> 21
-        else if (formula.startsWith("max ")) {
-            rollType = RollTypes.MAXIMUM;
-            formula = removePrefix("max ", formula);
-        }
-        // 2d10+1 kh -> max(3,9)+1 -> 10
-        else if (formula.endsWith(" kh")) {
-            rollType = RollTypes.KEEP_HIGHEST;
-            formula = removeSuffix(formula, " kh");
-        }
-        // 2d10+1 kl -> min(3,9)+1 -> 4
-        else if (formula.endsWith(" kl")) {
-            rollType = RollTypes.KEEP_LOWEST;
-            formula = removeSuffix(formula, " kl");
-        }
-        // d4 -> 1d4
-        if (formula.startsWith("d")) {
-            formula = "1" + formula;
-        }
-        String[] parts = formula.split("d"); 
-        int diceCount = Integer.parseInt(parts[0]);
 
+        // Handle Prefixes
+        if (formula.startsWith("min ")) { type = RollTypes.MINIMUM; formula = formula.substring(4); }
+        else if (formula.startsWith("max ")) { type = RollTypes.MAXIMUM; formula = formula.substring(4); }
+        else if (formula.startsWith("avg ")) { type = RollTypes.AVERAGE; formula = formula.substring(4); }
+        
+        // Handle Suffixes
+        if (formula.endsWith(" kh")) { type = RollTypes.KEEP_HIGHEST; formula = formula.substring(0, formula.length() - 3); }
+        else if (formula.endsWith(" kl")) { type = RollTypes.KEEP_LOWEST; formula = formula.substring(0, formula.length() - 3); }
+
+        // Removes spaces so "2d10 - 1" becomes "2d10-1"
+        formula = formula.replace(" ", "");
+
+        // Changes implicit count to explicit value so d4 becomes 1d4
+        if (formula.startsWith("d")) formula = "1" + formula;
+
+        String[] parts = formula.split("d");
+        int count = Integer.parseInt(parts[0]);
+
+        // Split sides and modifier (handles +/-)
         String[] subParts = parts[1].split("(?=[+-])");
-        int diceSides = Integer.parseInt(subParts[0]);
-        int diceModifier = subParts.length > 1 ? Integer.parseInt(subParts[1]) : 0;
+        int sides = Integer.parseInt(subParts[0]);
+        int modifier = (subParts.length > 1) ? Integer.parseInt(subParts[1]) : 0;
 
-        return new Dice(diceCount, diceSides, diceModifier, rollType);
+        return new Dice(count, sides, modifier, type);
     }
-    /**
-     * Statically rolls 1d20
-     * @return
-     */
+
+    @Override
+    public String toString() {
+        if (rollType == RollTypes.FIXED) return String.valueOf(diceModifier);
+
+        StringBuilder sb = new StringBuilder();
+        if (rollType == RollTypes.MINIMUM) sb.append("min ");
+        if (rollType == RollTypes.MAXIMUM) sb.append("max ");
+        if (rollType == RollTypes.AVERAGE) sb.append("avg ");
+
+        if (diceCount > 1) sb.append(diceCount);
+        sb.append("d").append(diceSides);
+
+        if (diceModifier != 0) sb.append(diceModifier > 0 ? "+" : "").append(diceModifier);
+        if (rollType == RollTypes.KEEP_HIGHEST) sb.append(" kh");
+        if (rollType == RollTypes.KEEP_LOWEST) sb.append(" kl");
+
+        return sb.toString();
+    }
+
     public static int D20() {
         return getCurrent().nextInt(20) + 1;
-    }
-    /**
-     * Statically rolls 2d20, keep highest
-     * @return 
-     */
-    public static int D20KH() {
-        return Math.max(D20(), D20());
-    }
-    /**
-     * Statically rolls 2d20, keep lowest
-     * @return 
-     */
-    public static int D20KL() {
-        return Math.min(D20(), D20());
     }
 
     private static ThreadLocalRandom getCurrent() {
         return ThreadLocalRandom.current();
-    }
-
-    @Override
-    public String toString() { 
-        if (rollType == RollTypes.FIXED) return String.valueOf(diceModifier);
-
-        String prefix = switch (rollType) {
-            case MINIMUM -> "min ";
-            case MAXIMUM -> "max ";
-            default -> "";
-        };
-        String suffix = switch (rollType) {
-            case KEEP_LOWEST -> " kl";
-            case KEEP_HIGHEST -> " kh";
-            default -> "";
-        };
-        String mod = this.diceModifier == 0 ? "" : String.format("%+d", this.diceModifier);
-
-        String text = String.format("%s%sd%s%s%s", 
-            prefix,
-            this.diceCount == 1 ? "" : this.diceCount, 
-            this.diceSides,
-            mod,
-            suffix
-        );
-        return text;
     }
 }

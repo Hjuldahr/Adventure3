@@ -8,6 +8,7 @@ import com.example.adventure.randomizer.Dice;
 
 public class PlayerClass {
     private EnumMap<DamageTypes, DamageModifierCategories> damageAdjustments;
+    
 
     public Dice getHitDiceForLevel(int level) {
         throw new UnsupportedOperationException("Unimplemented");

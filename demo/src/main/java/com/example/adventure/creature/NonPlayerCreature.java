@@ -1,9 +1,15 @@
 package com.example.adventure.creature;
 
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 
 import com.example.adventure.combat.AllegianceTypes;
-import com.example.adventure.combat.ConditionTypes;
+import com.example.adventure.combat.Conditions.ConditionTypes;
+import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
+import com.example.adventure.combat.DamageTypes;
+import com.example.adventure.creature.Ability.AbilityTypes;
 import com.example.adventure.creature.behaviours.AssassinAttackTargeting;
 import com.example.adventure.creature.behaviours.BattleHealerHealTargeting;
 import com.example.adventure.creature.behaviours.BerzerkerAttackTargeting;
@@ -14,6 +20,7 @@ import com.example.adventure.creature.behaviours.RoleTypes;
 import com.example.adventure.creature.behaviours.SlayerAttackTargeting;
 import com.example.adventure.creature.behaviours.SupportHealerHealTargeting;
 import com.example.adventure.creature.behaviours.Targeting;
+import com.example.adventure.randomizer.Dice;
 
 public abstract class NonPlayerCreature extends Creature
 {
@@ -21,13 +28,27 @@ public abstract class NonPlayerCreature extends Creature
     protected RoleTypes role;
     private Targeting attackTargeting;
     private Targeting healTargeting;
+
+    private HashMap<Creature,Integer> aggroMap = null;
     
     public NonPlayerCreature(
-        String name,
+        AllegianceTypes allegiance,
         RoleTypes role,
-        AllegianceTypes allegiance
+
+        String name,
+        SizeCategory sizeCategory,
+        CreatureType creatureType,
+        Alignment alignment,
+        Dice hitDice,
+        Ability abilities,
+        Proficiencies<AbilityTypes> saveProficiencies,
+        Proficiencies<SkillTypes> skillProficiencies,
+        EnumMap<DamageTypes,DamageModifierCategories> damageAdjustments,
+        EnumSet<VisionTypes> visionTypes,
+        EnumSet<Langauges> langauges
     ) {
-        super(name, allegiance);
+        super(allegiance, name, sizeCategory, creatureType, alignment, hitDice, abilities, saveProficiencies, skillProficiencies, damageAdjustments, visionTypes, langauges);
+        
         this.role = role;
 
         this.attackTargeting = switch(this.role) {
@@ -49,6 +70,13 @@ public abstract class NonPlayerCreature extends Creature
         this.role = other.role;
         this.attackTargeting = other.attackTargeting;
         this.healTargeting = other.healTargeting;
+    }
+
+    @Override
+    public void takeDamage(int damage, DamageTypes damageType, boolean wasCritical, Creature attacker) {
+        super.takeDamage(damage, damageType, wasCritical, attacker);
+
+        aggroMap.merge(attacker, damage, Integer::sum);
     }
 
     public int getArmourClass() {

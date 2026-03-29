@@ -38,6 +38,8 @@ public class PlayerCharacter extends Creature
     private int failedDeathSaves = 0;
     private boolean performingDeathSaves = false;
 
+    private SpellSlots spellSlots;
+
     public PlayerCharacter(
         int playerLevel,
         String name,
@@ -247,8 +249,8 @@ public class PlayerCharacter extends Creature
     }
 
     @Override
-    public void receiveDamage(int damage, boolean isCritical) {
-        super.receiveDamage(damage, isCritical);
+    public void takeDamage(int damage, DamageTypes damageType, boolean wasCritical, Creature attacker) {
+        super.takeDamage(damage, damageType, wasCritical, attacker);
 
         if (performingDeathSaves) {
             failedDeathSaves += isCritical ? 2 : 1;

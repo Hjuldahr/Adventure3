@@ -2,13 +2,14 @@ package com.example.adventure.item;
 
 import com.example.adventure.action.AttackAction.AttackRange;
 import com.example.adventure.combat.DamageTypes;
+import com.example.adventure.item.WeaponTemplates.WeaponTypes;
+import com.example.adventure.randomizer.Dice;
 
 import java.util.Arrays;
 import java.util.EnumSet;
 
 import com.example.adventure.action.AttackAction;
 import com.example.adventure.action.WeaponAttack;
-import com.example.adventure.utility.Dice;
 
 public class WeaponItem extends Item {
     public enum WeaponProperties {
@@ -56,9 +57,12 @@ public class WeaponItem extends Item {
     protected final boolean requiresAmmunition;
     protected final boolean canLoad;
     protected boolean isLoaded;
+
+    protected final WeaponTypes weaponType;
     
-    public WeaponItem(String name, int currencyAmount, CurrencyTypes currencyType, Dice damageDice, DamageTypes damageType, int weight, WeaponProperties... properties) {
+    public WeaponItem(WeaponTypes weaponType, String name, int currencyAmount, CurrencyTypes currencyType, Dice damageDice, DamageTypes damageType, int weight, WeaponProperties... properties) {
         this(
+            weaponType,
             name, 
             currencyAmount, currencyType,
             damageDice,
@@ -68,7 +72,7 @@ public class WeaponItem extends Item {
             properties
         );
     }
-    public WeaponItem(String name, int currencyAmount, CurrencyTypes currencyType, Dice damageDice, Dice altDamageDice, DamageTypes damageType, int weight, WeaponProperties... properties) {
+    public WeaponItem(WeaponTypes weaponType, String name, int currencyAmount, CurrencyTypes currencyType, Dice damageDice, Dice altDamageDice, DamageTypes damageType, int weight, WeaponProperties... properties) {
         super(name, "wielding");
 
         this.properties = properties.length == 0 ? EnumSet.noneOf(WeaponProperties.class) : EnumSet.copyOf(Arrays.asList(properties));
@@ -98,6 +102,8 @@ public class WeaponItem extends Item {
         this.requiresAmmunition = this.properties.stream().anyMatch(p -> p.isAmmunition());
         this.canLoad = this.properties.contains(WeaponProperties.LOADING);
         this.isLoaded = false;
+
+        this.weaponType = weaponType;
     }
 
     public boolean requiresBoth() { return isHeavy; }
@@ -126,4 +132,5 @@ public class WeaponItem extends Item {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getMagicBonus'");
     }
+    public WeaponTypes getWeaponType() { return weaponType; }
 }
