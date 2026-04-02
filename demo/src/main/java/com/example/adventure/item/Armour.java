@@ -2,8 +2,10 @@ package com.example.adventure.item;
 
 public class Armour extends Item {
     private ArmourTypes armourType; // base stats
+    
     private int maxAgilityBonus;
     private int armourClass;
+    private int minBrawnScore;
 
     public Armour(ArmourTypes armourType) {
         super(armourType.getName());
@@ -21,11 +23,6 @@ public class Armour extends Item {
     public int getMinBrawnScore() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getMinBrawnScore'");
-    }
-
-    public int getMagicBonus() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getMagicBonus'");
     }
 
     public boolean getAddAgility() {

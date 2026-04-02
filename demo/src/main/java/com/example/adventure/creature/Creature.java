@@ -14,6 +14,7 @@ import com.example.adventure.combat.DamageTypeHelper.DamageModifierCategories;
 import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.combat.SpellEffect;
 import com.example.adventure.creature.Ability.AbilityTypes;
+import com.example.adventure.creature.Alignment.Alignments;
 import com.example.adventure.creature.behaviours.RoleTypes;
 import com.example.adventure.item.WeaponTemplates.WeaponTypes;
 import com.example.adventure.randomizer.Dice;
@@ -27,7 +28,7 @@ public abstract class Creature //neither NPC nor PC
     protected String name;
     protected SizeCategory sizeCategory;
     protected CreatureType creatureType;
-    protected Alignment alignment;
+    protected Alignments alignment;
     protected Dice hitDice;
     protected HitPoints hitPoints;
     protected Ability abilities;
@@ -63,7 +64,7 @@ public abstract class Creature //neither NPC nor PC
         String name,
         SizeCategory sizeCategory,
         CreatureType creatureType,
-        Alignment alignment,
+        Alignments alignment,
         Dice hitDice,
         Ability abilities,
         Proficiencies<AbilityTypes> saveProficiencies,
@@ -306,28 +307,18 @@ public abstract class Creature //neither NPC nor PC
         return abilities.getAbilityScore(category);
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return this.name; }
 
     public int getInitiativeModifier() {
         // TODO add other bonuses
         return abilities.getAbilityModifier(AbilityTypes.AGILITY);
     }
 
-    public boolean hasInitiativeAdvantage() {
-        return hasInitiativeAdvantage;
-    }
-
-    public AllegianceTypes getAllegiance() {
-        return allegiance;
-    }
+    public AllegianceTypes getAllegiance() { return this.allegiance; }
+    public Alignments getAlignment() { return this.alignment; }
 
     // should be automatically deleted on being killed
-    public boolean getPersistOnDeath() {
-        // TODO Auto-generated method stub
-        return false;
-    }
+    public abstract boolean getPersistOnDeath();
 
     public boolean isDefeated() {
         if (hasSurrendered) return true; // gave up

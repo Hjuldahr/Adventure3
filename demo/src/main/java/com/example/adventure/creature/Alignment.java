@@ -1,48 +1,48 @@
 package com.example.adventure.creature;
 
-public enum Alignment {
-    LAWFUL_GOOD("Lawful Good", true, false, true, false),
-    NEUTRAL_GOOD("Neutral Good", true, false, false, false),
-    CHAOTIC_GOOD("Chaotic Good", true, false, false, true), 
-    LAWFUL_NEUTRAL("Lawful Neutral", false, false, true, false),
-    TRUE_NEUTRAL("True Neutral", false, false, false, false),
-    CHAOTIC_NEUTRAL("Chaotic Neutral", false, false, false, true), 
-    LAWFUL_EVIL("Lawful Evil", false, true, true, false),
-    NEUTRAL_EVIL("Neutral Evil", false, true, false, false),
-    CHAOTIC_EVIL("Chaotic Evil", false, true, false, true),
-    UNALIGNED("Unaligned", false, false, false, false);
+import com.example.adventure.creature.Alignment.SubAlignments;
 
-    private final String name;
-    private final boolean isGood;
-    private final boolean isEvil;
-    private final boolean isLawful;
-    private final boolean isChaotic;
+public abstract class Alignment {
+    public enum SubAlignments {
+        NEUTRAL,
+        LAWFUL,
+        CHAOTIC,
+        GOOD,
+        EVIL,
+        NONE
+    }
 
-    Alignment(String name, boolean isGood, boolean isEvil, boolean isLawful, boolean isChoatic) {
-        this.name = name;
-        this.isGood = isGood;
-        this.isEvil = isEvil;
-        this.isLawful = isLawful;
-        this.isChaotic = isChoatic;
-    }
-    public String getName() {
-        return this.name;
-    }
-    public boolean isGood() {
-        return isGood;
-    }
-    public boolean isEvil() {
-        return this.isEvil;
-    }
-    public boolean isLawful() {
-        return this.isLawful;
-    }
-    public boolean isChaotic() {
-        return this.isChaotic;
-    }
-    public boolean isOpposed(Alignment other) {
-        boolean moralConflict = (this.isGood && other.isEvil) || (this.isEvil && other.isGood);
-        boolean orderConflict = (this.isLawful && other.isChaotic) || (this.isChaotic && other.isLawful);
-        return moralConflict || orderConflict;
+    public enum Alignments {
+        LAWFUL_GOOD("Lawful Good", SubAlignments.LAWFUL, SubAlignments.GOOD),
+        NEUTRAL_GOOD("Neutral Good", SubAlignments.NEUTRAL, SubAlignments.GOOD),
+        CHAOTIC_GOOD("Chaotic Good", SubAlignments.CHAOTIC, SubAlignments.GOOD), 
+        
+        LAWFUL_NEUTRAL("Lawful Neutral", SubAlignments.LAWFUL, SubAlignments.NEUTRAL),
+        TRUE_NEUTRAL("True Neutral", SubAlignments.NEUTRAL, SubAlignments.NEUTRAL),
+        CHAOTIC_NEUTRAL("Chaotic Neutral", SubAlignments.CHAOTIC, SubAlignments.NEUTRAL), 
+        
+        LAWFUL_EVIL("Lawful Evil", SubAlignments.LAWFUL, SubAlignments.EVIL),
+        NEUTRAL_EVIL("Neutral Evil", SubAlignments.NEUTRAL, SubAlignments.EVIL),
+        CHAOTIC_EVIL("Chaotic Evil", SubAlignments.CHAOTIC, SubAlignments.EVIL),
+
+        UNALIGNED("Unaligned", SubAlignments.NONE, SubAlignments.NONE);
+
+        private final String name;
+        private final SubAlignments ethic;
+        private final SubAlignments moral;
+
+        Alignments(String name, SubAlignments ethic, SubAlignments moral) {
+            this.name = name;
+            this.ethic = ethic;
+            this.moral = moral;
+        }
+
+        public String getName() { this.name; }
+        public SubAlignments getEthic() { this.ethic; }
+        public SubAlignments getMoral() { this.moral; }
+
+        public boolean hasSubAlignment(SubAlignments subAlignment) {
+            return this.ethic.equals(subAlignment) || this.moral.equals(subAlignment);
+        }
     }
 }

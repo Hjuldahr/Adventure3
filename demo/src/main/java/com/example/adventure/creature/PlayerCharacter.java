@@ -2,6 +2,7 @@ package com.example.adventure.creature;
 
 import com.example.adventure.currency.CoinPurse;
 import com.example.adventure.combat.AllegianceTypes;
+import com.example.adventure.combat.DamageTypes;
 import com.example.adventure.creature.Ability.AbilityTypes;
 import com.example.adventure.creature.Proficiencies.ProficiencyTiers;
 import com.example.adventure.item.Armour;
@@ -292,5 +293,6 @@ public class PlayerCharacter extends Creature
         }
     }
 
-    
+    public PlayerClass getPlayerClass() { return this.playerClass; }
+    public PlayableRace getPlayerRace() { return this.playerRace; }
 }
