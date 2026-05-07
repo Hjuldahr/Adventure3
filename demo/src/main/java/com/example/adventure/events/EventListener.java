@@ -64,12 +64,12 @@ public class EventListener
         eventBindings.clear();
     }
 
-    public Set<Consumer<?>> getBinding(EventTypes eventType) {
+    public Set<Consumer<?>> get(EventTypes eventType) {
         Set<Consumer<?>> bindings = eventBindings.get(eventType);
         return bindings == null ? Set.of() : Set.copyOf(bindings);
     }
 
-    public Set<Consumer<?>> getBinding(EventTypes eventType, Collection<Consumer<?>> defaultEvents) {
+    public Set<Consumer<?>> get(EventTypes eventType, Collection<Consumer<?>> defaultEvents) {
         Set<Consumer<?>> bindings = eventBindings.get(eventType);
         return (bindings == null || bindings.isEmpty()) 
             ? Set.copyOf(defaultEvents) 

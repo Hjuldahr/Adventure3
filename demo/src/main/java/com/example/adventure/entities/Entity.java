@@ -1,6 +1,7 @@
 package com.example.adventure.entities;
 
 import com.example.adventure.events.EventListener;
+import com.example.adventure.events.EventTypes;
 
 public abstract class Entity {
     protected String name;
@@ -17,7 +18,8 @@ public abstract class Entity {
 
     public EventListener getEventListener() { return eventListener; }
 
-    public void takeDamage(int damage) {
-
+    public void takeDamage(Entity attacker, int damage) {
+        hitPoints.change(-damage);
+        eventListener.get(EventTypes.TAKE_DAMAGE).accept(attacker, damage);
     }
 }
