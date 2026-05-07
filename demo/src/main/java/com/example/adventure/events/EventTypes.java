@@ -1,0 +1,20 @@
+package com.example.adventure.events;
+
+public enum EventTypes {
+    HEALED_BY_ITEM,
+    HEALED_BY_SPELL,
+    HIT_BY_SPELL,
+    HIT_BY_WEAPON,
+    ATTACKED_BY_SPELL,
+    ATTACKED_BY_WEAPON,
+
+    HEAL_WITH_ITEM,
+    HEAL_WITH_SPELL,
+    HIT_WITH_SPELL,
+    HIT_WITH_WEAPON,
+    ATTACK_WITH_SPELL,
+    ATTACK_WITH_WEAPON,
+
+    ENTER_COMBAT,
+    LEAVE_COMBAT,
+}
