@@ -9,33 +9,32 @@ import java.util.Set;
 
 import com.example.adventure.context.DataRecord;
 
-public class EventListener<K extends Enum<K>> 
+public class EventListener 
 {
-    private EnumMap<K,Set<EventContainer<K>>> eventBindings;
+    private EnumMap<EventTypes,Set<EventContainer>> eventBindings;
 
     /**
      * Constructor
-     * @param clazz
      */
-    public EventListener(Class<K> clazz) {
-        this.eventBindings = new EnumMap<>(clazz);
+    public EventListener() {
+        this.eventBindings = new EnumMap<>(EventTypes.class);
     }
 
     /**
      * Cloning Constructor
      * @param other
      */
-    public EventListener(EventListener<K> other) {
-        this.eventBindings = new EnumMap<>(other.eventBindings);
-        // unbind
-        this.eventBindings.replaceAll((key, set) -> new HashSet<>(set));
+    public EventListener(EventListener other) {
+        this.eventBindings = new EnumMap<>(EventTypes.class);
+        // unlink shallow memory references
+        other.eventBindings.forEach((k, v) -> this.eventBindings.put(k, new HashSet<>(v)));
     }
 
     /**
      * Bind a single event
      * @param event
      */
-    public void bind(EventContainer<K> event) {
+    public void bind(EventContainer event) {
         if (event == null) return;
         eventBindings.computeIfAbsent(event.getEventType(), (k) -> new HashSet<>()).add(event);
     }
@@ -44,7 +43,7 @@ public class EventListener<K extends Enum<K>>
      * Bind multiple events
      * @param events
      */
-    public void bindAll(Collection<EventContainer<K>> events) {
+    public void bindAll(Collection<EventContainer> events) {
         if (events != null) {
             events.forEach(this::bind);
         }
@@ -54,7 +53,7 @@ public class EventListener<K extends Enum<K>>
      * Bind multiple events
      * @param events
      */
-    public void bindAll(EventContainer<K>[] events) {
+    public void bindAll(EventContainer[] events) {
         if (events != null) {
             Arrays.stream(events).forEach(this::bind);
         }
@@ -64,7 +63,7 @@ public class EventListener<K extends Enum<K>>
      * Unbind a single events
      * @param event
      */
-    public void unbind(EventContainer<K> event) {
+    public void unbind(EventContainer event) {
         if (event == null) return;
         eventBindings.computeIfPresent(event.getEventType(), (_, v) -> {
             v.remove(event);
@@ -76,7 +75,7 @@ public class EventListener<K extends Enum<K>>
      * Unbind multiple events
      * @param events
      */
-    public void unbindAll(Collection<EventContainer<K>> events) {
+    public void unbindAll(Collection<EventContainer> events) {
         if (events != null) {
             events.forEach(this::unbind);
         }
@@ -86,7 +85,7 @@ public class EventListener<K extends Enum<K>>
      * Unbind multiple events
      * @param events
      */
-    public void unbindAll(EventContainer<K>[] events) {
+    public void unbindAll(EventContainer[] events) {
         if (events != null) {
             Arrays.stream(events).forEach(this::unbind);
         }
@@ -96,7 +95,7 @@ public class EventListener<K extends Enum<K>>
      * Unbind all events by type
      * @param eventType
      */
-    public void unbindAll(K eventType) {
+    public void unbindAll(EventTypes eventType) {
         eventBindings.remove(eventType);
     }
 
@@ -112,7 +111,7 @@ public class EventListener<K extends Enum<K>>
      * @param eventType
      * @param params
      */
-    public void fire(K eventType, DataRecord params) {
+    public void fire(EventTypes eventType, DataRecord params) {
         get(eventType).forEach(e -> e.fire(params));
     }
 
@@ -122,7 +121,7 @@ public class EventListener<K extends Enum<K>>
      * @param defaultEvents
      * @param params
      */
-    public void fire(K eventType, Set<EventContainer<K>> defaultEvents, DataRecord params) {
+    public void fire(EventTypes eventType, Set<EventContainer> defaultEvents, DataRecord params) {
         get(eventType, defaultEvents).forEach(e -> e.fire(params));
     }
 
@@ -131,7 +130,7 @@ public class EventListener<K extends Enum<K>>
      * @param eventType
      * @return bound events or empty set
      */
-    public Set<EventContainer<K>> get(K eventType) {
+    public Set<EventContainer> get(EventTypes eventType) {
         return get(eventType, Set.of());
     }
 
@@ -141,7 +140,7 @@ public class EventListener<K extends Enum<K>>
      * @param defaultEvents
      * @return bound events or default events
      */
-    public Set<EventContainer<K>> get(K eventType, Set<EventContainer<K>> defaultEvents) {
+    public Set<EventContainer> get(EventTypes eventType, Set<EventContainer> defaultEvents) {
         Objects.requireNonNull(defaultEvents, "Default Events must be non null");
         return Set.copyOf(eventBindings.getOrDefault(eventType, defaultEvents));
     }

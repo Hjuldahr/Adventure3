@@ -1,6 +1,8 @@
 package com.example.adventure.actions;
 
-public abstract class Action<T extends Record> {
+import com.example.adventure.context.DataRecord;
+
+public abstract class Action {
     private final String name;
 
     public Action(String name) {
@@ -12,5 +14,5 @@ public abstract class Action<T extends Record> {
      * Perform an action
      * @return result data
      */
-    abstract public T trigger();
+    abstract public DataRecord trigger();
 }
