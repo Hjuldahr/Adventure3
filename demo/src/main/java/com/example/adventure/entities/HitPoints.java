@@ -13,6 +13,11 @@ public class HitPoints {
         this.maxHP = maxHP;
     }
 
+    public HitPoints(HitPoints other) {
+        this.currentHP = other.currentHP;
+        this.maxHP = other.maxHP;
+    }
+
     public int getCurrentHP() { return currentHP; }
     public void setCurrentHP(int currentHP) { this.currentHP = Math.clamp(currentHP, 0, this.maxHP); }
 
