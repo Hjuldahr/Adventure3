@@ -14,6 +14,8 @@ public class Entity {
 
     protected EventListener eventListener;
 
+    protected int speed;
+
     public Entity(String name, int maxHP) {
         this.name = name;
         this.hitPoints = new HitPoints(maxHP);
@@ -32,6 +34,8 @@ public class Entity {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public int getSpeed() { return speed; }
 
     public EventListener getEventListener() { return eventListener; }
 
@@ -77,5 +81,10 @@ public class Entity {
         eventListener.fire(EventTypes.DID_HEAL, params);
 
         params.get(Keys.TARGET).receiveHeal(params);
+    }
+
+    public void act() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'act'");
     }
 }
