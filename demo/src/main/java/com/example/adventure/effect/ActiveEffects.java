@@ -1,37 +1,40 @@
 package com.example.adventure.effect;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public class ActiveEffects {
-    private Set<Effect> effects;
+    private HashMap<String,Effect> effects;
     
     public ActiveEffects() {
-        effects = new HashSet<>();
+        effects = new HashMap<>();
     }
 
     public ActiveEffects(ActiveEffects activeEffects) {
-        effects = new HashSet<>(activeEffects.effects);
+        effects = new HashMap<>(activeEffects.effects);
     }
 
     public void decrementDuration() {
-        effects.forEach(Effect::decrementDuration);
+        effects.values().forEach(Effect::decrementDuration);
     }
 
     public List<Effect> getExpiredEffects() {
-        return effects.stream().filter(Effect::isExpired).toList();
+        return effects.values().stream()
+            .filter(Effect::isExpired)
+            .toList();
     }
 
     public boolean remove(Effect effect) {
-        return effects.remove(effect);
+        return effects.remove(effect.getName()) != null;
     }
 
     public boolean add(Effect effect) {
-        return effects.add(effect); // Assuming a Set configuration underneath
+        boolean alreadyPresent = effects.containsKey(effect.getName());
+        effects.merge(effect.getName(), effect, Effect::merge);
+        return !alreadyPresent;
     }
 
     public List<Effect> getEffects() {
-        return List.copyOf(effects);
+        return List.copyOf(effects.values());
     }
 }

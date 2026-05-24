@@ -1,19 +1,19 @@
 package com.example.adventure.entities;
 
-public class HitPoints {
+public class Resource {
     private int currentHP;
     private int maxHP;
 
-    public HitPoints(int maxHP) {
+    public Resource(int maxHP) {
         this(maxHP, maxHP);
     }
 
-    public HitPoints(int currentHP, int maxHP) {
+    public Resource(int currentHP, int maxHP) {
         this.currentHP = currentHP;
         this.maxHP = maxHP;
     }
 
-    public HitPoints(HitPoints other) {
+    public Resource(Resource other) {
         this.currentHP = other.currentHP;
         this.maxHP = other.maxHP;
     }
@@ -47,6 +47,6 @@ public class HitPoints {
 
     @Override
     public String toString() {
-        return "%s / %S HP".formatted(this.currentHP, this.maxHP);
+        return "%s/%s".formatted(this.currentHP, this.maxHP);
     }
 }

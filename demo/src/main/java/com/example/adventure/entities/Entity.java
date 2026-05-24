@@ -1,10 +1,8 @@
 package com.example.adventure.entities;
 
-import java.util.List;
-
+import com.example.adventure.categories.AbilityScores;
 import com.example.adventure.categories.DamageModifiers;
 import com.example.adventure.categories.DamageTypes;
-import com.example.adventure.context.ContextKey;
 import com.example.adventure.context.DataRecord;
 import com.example.adventure.context.Keys;
 import com.example.adventure.effect.ActiveEffects;
@@ -14,10 +12,13 @@ import com.example.adventure.events.EventTypes;
 
 public class Entity {
     protected String name;
-    protected HitPoints hitPoints;
-    protected HitPoints magicPoints;
+    protected int level = 1;
+
+    protected Resource hitPoints;
+    protected Resource magicPoints;
 
     protected DamageModifiers damageModifiers;
+    protected AbilityScores abilityScores;
     protected ActiveEffects activeEffects;
     protected float healModifier = 1f;
 
@@ -28,16 +29,17 @@ public class Entity {
     public Entity(String name, int maxHP) {
         this.name = name;
 
-        this.hitPoints = new HitPoints(maxHP);
+        this.hitPoints = new Resource(maxHP);
         this.eventListener = new EventListener();
         this.activeEffects = new ActiveEffects();
         this.damageModifiers = new DamageModifiers();
+        this.abilityScores = new AbilityScores();
     }
 
     public Entity(Entity other) {
         this.name = other.name;
 
-        this.hitPoints = new HitPoints(other.hitPoints);
+        this.hitPoints = new Resource(other.hitPoints);
         this.eventListener = new EventListener(other.eventListener);
         this.activeEffects = new ActiveEffects(other.activeEffects);
         this.damageModifiers = new DamageModifiers(other.damageModifiers);
@@ -96,14 +98,9 @@ public class Entity {
     }
 
     public void startOfTurn() {
-        List<Effect> currentEffects = activeEffects.getEffects();
-        
-        for (Effect effect : currentEffects) {
+        for (Effect effect : activeEffects.getEffects()) {
             DataRecord params = effect.getParams();
             
-            if (params.has(Keys.APPLY_DAMAGE)) {
-                receiveDamage(params);
-            }
             if (params.has(Keys.APPLY_HEAL)) {
                 receiveHeal(params);
             }
@@ -123,9 +120,21 @@ public class Entity {
                 params.get(Keys.RECEIVED_DAMAGE_MODIFIER)
             );
         }
+
+        if (params.has(Keys.APPLY_HEAL)) {
+            receiveHeal(params);
+        }
     }
 
     public void endOfTurn() {
+        for (Effect effect : activeEffects.getEffects()) {
+            DataRecord params = effect.getParams();
+            
+            if (params.has(Keys.APPLY_DAMAGE)) {
+                receiveDamage(params);
+            }
+        }
+
         activeEffects.decrementDuration();
         activeEffects.getExpiredEffects().forEach(this::removeEffect);
     }

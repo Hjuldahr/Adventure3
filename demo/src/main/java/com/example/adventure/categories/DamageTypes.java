@@ -23,4 +23,6 @@ public enum DamageTypes
 
     public String getName() { return name; }
     public boolean isElemental() { return isElemental; }
+    @Override
+    public String toString() { return name; }
 }
