@@ -35,7 +35,9 @@ public class CombatEncounter {
 
     private void encounterTurn(int number) {
         Entity entity = combatContext.get(number);
-        entity.act();
+        entity.startOfTurn();
+        entity.middleOfTurn();
+        entity.endOfTurn();
     }
 
     private void endEncounter() {

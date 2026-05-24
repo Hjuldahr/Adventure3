@@ -90,7 +90,7 @@ public class Entity {
         params.get(Keys.TARGET).receiveHeal(params);
     }
 
-    public void act() {
+    public void middleOfTurn() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'act'");
     }
