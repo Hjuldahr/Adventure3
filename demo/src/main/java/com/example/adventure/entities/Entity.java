@@ -1,7 +1,10 @@
 package com.example.adventure.entities;
 
+import java.util.List;
+
 import com.example.adventure.categories.DamageModifiers;
 import com.example.adventure.categories.DamageTypes;
+import com.example.adventure.context.ContextKey;
 import com.example.adventure.context.DataRecord;
 import com.example.adventure.context.Keys;
 import com.example.adventure.effect.ActiveEffects;
@@ -12,6 +15,7 @@ import com.example.adventure.events.EventTypes;
 public class Entity {
     protected String name;
     protected HitPoints hitPoints;
+    protected HitPoints magicPoints;
 
     protected DamageModifiers damageModifiers;
     protected ActiveEffects activeEffects;
@@ -47,26 +51,22 @@ public class Entity {
     public EventListener getEventListener() { return eventListener; }
 
     public void receiveHeal(DataRecord params) {
-        int baseHealing = params.get(Keys.HEAL);
+        int baseHealing = params.get(Keys.APPLY_DAMAGE);
         // -50% = harmed by healing, 0% = cannot be healed, 100% = base, 150% = bonus
         int finalHeal = (int) (baseHealing * healModifier);
 
-        params.set(Keys.EFFECTIVE_HEAL, finalHeal);
         eventListener.fire(EventTypes.TAKE_HEAL, params);
-
         hitPoints.change(finalHeal);
     }
 
     public void receiveDamage(DataRecord params) {
-        int baseDamage = params.get(Keys.DAMAGE);
+        int baseDamage = params.get(Keys.APPLY_DAMAGE);
         DamageTypes damageType = params.get(Keys.DAMAGE_TYPE);
 
         float damageModifier = damageModifiers.getModifier(damageType);
         int finalDamage = Math.clamp(Math.round(baseDamage * damageModifier), 0, 9_999);
 
-        params.set(Keys.EFFECTIVE_DAMAGE, finalDamage);
         eventListener.fire(EventTypes.TAKE_DAMAGE, params);
-
         hitPoints.change(-finalDamage);
     }
 
@@ -95,19 +95,53 @@ public class Entity {
         throw new UnsupportedOperationException("Unimplemented method 'act'");
     }
 
-    public void applyEffect(Effect effect) {
-        if (!activeEffects.apply(effect)) return;
+    public void startOfTurn() {
+        List<Effect> currentEffects = activeEffects.getEffects();
         
-        if (effect.modifiesDamage()) {
-            damageModifiers.addTemporaryModifier(effect.getDamageType(), effect.getModifier());
+        for (Effect effect : currentEffects) {
+            DataRecord params = effect.getParams();
+            
+            if (params.has(Keys.APPLY_DAMAGE)) {
+                receiveDamage(params);
+            }
+            if (params.has(Keys.APPLY_HEAL)) {
+                receiveHeal(params);
+            }
         }
+    }
+
+    public void applyEffect(Effect effect) {
+        if (!activeEffects.add(effect)) return; 
+        
+        System.out.printf("[+] %s\n", effect.getName());
+
+        DataRecord params = effect.getParams();
+        
+        if (params.has(Keys.RECEIVED_DAMAGE_MODIFIER)) {
+            damageModifiers.addTemporaryModifier(
+                params.get(Keys.DAMAGE_TYPE), 
+                params.get(Keys.RECEIVED_DAMAGE_MODIFIER)
+            );
+        }
+    }
+
+    public void endOfTurn() {
+        activeEffects.decrementDuration();
+        activeEffects.getExpiredEffects().forEach(this::removeEffect);
     }
 
     public void removeEffect(Effect effect) {
         if (!activeEffects.remove(effect)) return;
 
-        if (effect.modifiesDamage()) {
-            damageModifiers.removeTemporaryModifier(effect.getDamageType(), effect.getModifier());
+        System.out.printf("[-] %s\n", effect.getName());
+
+        DataRecord params = effect.getParams();
+
+        if (params.has(Keys.RECEIVED_DAMAGE_MODIFIER)) {
+            damageModifiers.removeTemporaryModifier(
+                params.get(Keys.DAMAGE_TYPE), 
+                params.get(Keys.RECEIVED_DAMAGE_MODIFIER)
+            );
         }
     }
 }

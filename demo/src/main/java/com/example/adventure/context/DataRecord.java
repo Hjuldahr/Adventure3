@@ -6,6 +6,14 @@ import java.util.Map;
 public class DataRecord {
     private final Map<ContextKey<?>, Object> values = new HashMap<>();
 
+    public DataRecord() {}
+
+    public DataRecord(DataRecord other) {
+        if (other != null && !other.values.isEmpty()) {
+            values.putAll(other.values);
+        }
+    }
+
     public <T> DataRecord set(ContextKey<T> key, T value) {
         values.put(key, value);
         return this; 
