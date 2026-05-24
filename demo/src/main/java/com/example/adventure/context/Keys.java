@@ -1,6 +1,6 @@
 package com.example.adventure.context;
 
-import com.example.adventure.entities.DamageTypes;
+import com.example.adventure.categories.DamageTypes;
 import com.example.adventure.entities.Entity;
 
 public abstract class Keys {

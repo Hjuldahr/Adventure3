@@ -1,7 +1,11 @@
 package com.example.adventure.entities;
 
+import com.example.adventure.categories.DamageModifiers;
+import com.example.adventure.categories.DamageTypes;
 import com.example.adventure.context.DataRecord;
 import com.example.adventure.context.Keys;
+import com.example.adventure.effect.ActiveEffects;
+import com.example.adventure.effect.Effect;
 import com.example.adventure.events.EventListener;
 import com.example.adventure.events.EventTypes;
 
@@ -9,7 +13,8 @@ public class Entity {
     protected String name;
     protected HitPoints hitPoints;
 
-    protected DamageResistances damageResistances;
+    protected DamageModifiers damageModifiers;
+    protected ActiveEffects activeEffects;
     protected float healModifier = 1f;
 
     protected EventListener eventListener;
@@ -18,18 +23,20 @@ public class Entity {
 
     public Entity(String name, int maxHP) {
         this.name = name;
-        this.hitPoints = new HitPoints(maxHP);
 
+        this.hitPoints = new HitPoints(maxHP);
         this.eventListener = new EventListener();
-        this.damageResistances = new DamageResistances();
+        this.activeEffects = new ActiveEffects();
+        this.damageModifiers = new DamageModifiers();
     }
 
     public Entity(Entity other) {
         this.name = other.name;
-        this.hitPoints = new HitPoints(other.hitPoints);
 
+        this.hitPoints = new HitPoints(other.hitPoints);
         this.eventListener = new EventListener(other.eventListener);
-        this.damageResistances = new DamageResistances(other.damageResistances);
+        this.activeEffects = new ActiveEffects(other.activeEffects);
+        this.damageModifiers = new DamageModifiers(other.damageModifiers);
     }
 
     public String getName() { return name; }
@@ -54,7 +61,7 @@ public class Entity {
         int baseDamage = params.get(Keys.DAMAGE);
         DamageTypes damageType = params.get(Keys.DAMAGE_TYPE);
 
-        float damageModifier = damageResistances.getResistanceModifier(damageType);
+        float damageModifier = damageModifiers.getModifier(damageType);
         int finalDamage = Math.clamp(Math.round(baseDamage * damageModifier), 0, 9_999);
 
         params.set(Keys.EFFECTIVE_DAMAGE, finalDamage);
@@ -86,5 +93,21 @@ public class Entity {
     public void act() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'act'");
+    }
+
+    public void applyEffect(Effect effect) {
+        if (!activeEffects.apply(effect)) return;
+        
+        if (effect.modifiesDamage()) {
+            damageModifiers.addTemporaryModifier(effect.getDamageType(), effect.getModifier());
+        }
+    }
+
+    public void removeEffect(Effect effect) {
+        if (!activeEffects.remove(effect)) return;
+
+        if (effect.modifiesDamage()) {
+            damageModifiers.removeTemporaryModifier(effect.getDamageType(), effect.getModifier());
+        }
     }
 }
