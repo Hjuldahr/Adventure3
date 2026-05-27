@@ -5,8 +5,8 @@ public class Player extends Entity {
     
     private int experience;
     
-    public Player(String name, int maxHP) {
-        super(name, maxHP);
+    public Player(String name, Pronouns pronoun, int maxHP) {
+        super(name, pronoun, maxHP);
     }
 
     public void addExperience(int experience) {

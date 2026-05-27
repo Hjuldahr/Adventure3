@@ -3,8 +3,8 @@ package com.example.adventure.entities;
 public class NPC extends Entity {
     protected int armourScore = 10; // TEMP
 
-    public NPC(String name, int maxHP) {
-        super(name, maxHP);
+    public NPC(String name, Pronouns pronoun, int maxHP) {
+        super(name, pronoun, maxHP);
     }
 
     public NPC(NPC other) {

@@ -19,7 +19,7 @@ public abstract class Entity {
     protected final float GLANCE_PENALTY = 0.5f;
     
     protected String name;
-    protected String pronoun;
+    protected Pronouns pronoun;
     protected int level = 1;
 
     protected Resource hitPoints;
@@ -38,8 +38,9 @@ public abstract class Entity {
 
     protected EventListener eventListener;
 
-    public Entity(String name, int maxHP) {
+    public Entity(String name, Pronouns pronoun, int maxHP) {
         this.name = name;
+        this.pronoun = pronoun;
 
         this.hitPoints = new Resource(maxHP);
         this.eventListener = new EventListener();
@@ -51,6 +52,7 @@ public abstract class Entity {
 
     public Entity(Entity other) {
         this.name = other.name;
+        this.pronoun = other.pronoun;
 
         this.hitPoints = new Resource(other.hitPoints);
         this.eventListener = new EventListener(other.eventListener);
@@ -99,7 +101,7 @@ public abstract class Entity {
 
         if (!isHit && !isGlance) {
             System.out.println("Miss!");
-            return; // Pure miss. Exit early, allocate nothing, alert nobody.
+            return; 
         }
 
         DataRecord temp = new DataRecord(params);
@@ -109,14 +111,20 @@ public abstract class Entity {
             if (luck <= CRIT_THRESHOLD) {
                 damage = (int) Math.ceil(damage * CRIT_BONUS);
                 temp.set(Keys.IS_CRITICAL_HIT);
-                //System.out.printf("%s critically hits with %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
+                System.out.printf("%s critically hits %s using %s.\n", 
+                    name, target.name, temp.get(Keys.ATTACK_NAME)
+                );
             } else {
-                //System.out.printf("%s hits with %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
+                System.out.printf("%s hits %s using %s.\n", 
+                    name, target.name, temp.get(Keys.ATTACK_NAME)
+                );
             }
         } else { 
             damage = (int) Math.ceil(damage * GLANCE_PENALTY);
             temp.set(Keys.IS_GLANCING_HIT);
-            //System.out.printf("%s glancingly hits with %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
+            System.out.printf("%s glancingly hits %s using %s.\n", 
+                name, target.name, temp.get(Keys.ATTACK_NAME)
+            );
         }
         
         temp.set(Keys.DAMAGE_TAKEN, damage);
@@ -133,13 +141,22 @@ public abstract class Entity {
         if (luck <= CRIT_THRESHOLD) {
             damage = (int) Math.ceil(damage * CRIT_BONUS);
             temp.set(Keys.IS_CRITICAL_HIT);
+            System.out.printf("%s strongly casts at %s with %s.\n", 
+                name, target.name, temp.get(Keys.ATTACK_NAME)
+            );
+
             //System.out.printf("%s critically casts %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
         } else if (luck >= 1f - GLANCE_THRESHOLD) {
             damage = (int) Math.ceil(damage * GLANCE_PENALTY);
             temp.set(Keys.IS_GLANCING_HIT);
-            //System.out.printf("%s barely casts %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
+            System.out.printf("%s weakly casts at %s with %s.\n", 
+                name, target.name, temp.get(Keys.ATTACK_NAME)
+            );
+
         } else {
-            //System.out.printf("%s casts %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
+            System.out.printf("%s casts at %s with %s.\n", 
+                name, target.name, temp.get(Keys.ATTACK_NAME)
+            );
         }
         
         temp.set(Keys.DAMAGE_TAKEN, damage);
@@ -187,19 +204,20 @@ public abstract class Entity {
         if (luck <= CRIT_THRESHOLD) {
             healing = (int) Math.ceil(healing * CRIT_BONUS);
             temp.set(Keys.IS_CRITICAL_HEAL);
-            System.out.printf("%s casts %s at %s critically healing %s.", 
-                name, temp.get(Keys.ATTACK_NAME), target.name, target.pronoun
+            System.out.printf("%s strongly casts at %s with %s.\n", 
+                name, target.name, temp.get(Keys.ATTACK_NAME)
             );
 
         } else if (luck >= 1f - GLANCE_THRESHOLD) {
             healing = (int) Math.ceil(healing * GLANCE_PENALTY);
             temp.set(Keys.IS_WEAK_HEAL);
-            System.out.printf("%s casts %s at %s weakly healing %s.", 
-                name, temp.get(Keys.ATTACK_NAME), target.name, target.pronoun
+            System.out.printf("%s weakly casts at %s with %s.\n", 
+                name, target.name, temp.get(Keys.ATTACK_NAME)
             );
+
         } else {
-            System.out.printf("%s casts %s at %s healing %s.", 
-                name, temp.get(Keys.ATTACK_NAME), target.name, target.pronoun
+            System.out.printf("%s casts at %s with %s.\n", 
+                name, target.name, temp.get(Keys.ATTACK_NAME)
             );
         }
 
@@ -231,12 +249,18 @@ public abstract class Entity {
 
         DataRecord params = effect.getParams();
         
-        //if (params.has(Keys.RECEIVED_DAMAGE_MODIFIER)) {
-        //    damageModifiers.addTemporaryModifier(
-        //        params.get(Keys.DAMAGE_TYPE), 
-        //        params.get(Keys.RECEIVED_DAMAGE_MODIFIER)
-        //    );
-        //}
+        if (params.has(Keys.RECEIVED_DAMAGE_MODIFIER)) {
+            defenceModifiers.addTemporaryModifier(
+                params.get(Keys.DAMAGE_TYPE), 
+                params.get(Keys.RECEIVED_DAMAGE_MODIFIER)
+            );
+        }
+        else if (params.has(Keys.DEALT_DAMAGE_MODIFIER)) {
+            attackModifiers.addTemporaryModifier(
+                params.get(Keys.DAMAGE_TYPE), 
+                params.get(Keys.DEALT_DAMAGE_MODIFIER)
+            );
+        }
 
         if (params.has(Keys.HEALING_OVER_TIME)) {
             receiveHeal(params);
@@ -263,11 +287,17 @@ public abstract class Entity {
 
         DataRecord params = effect.getParams();
 
-        //if (params.has(Keys.RECEIVED_DAMAGE_MODIFIER)) {
-        //    damageModifiers.removeTemporaryModifier(
-        //        params.get(Keys.DAMAGE_TYPE), 
-        //        params.get(Keys.RECEIVED_DAMAGE_MODIFIER)
-        //    );
-        //}
+        if (params.has(Keys.RECEIVED_DAMAGE_MODIFIER)) {
+            defenceModifiers.removeTemporaryModifier(
+                params.get(Keys.DAMAGE_TYPE), 
+                params.get(Keys.RECEIVED_DAMAGE_MODIFIER)
+            );
+        }
+        else if (params.has(Keys.DEALT_DAMAGE_MODIFIER)) {
+            attackModifiers.removeTemporaryModifier(
+                params.get(Keys.DAMAGE_TYPE), 
+                params.get(Keys.DEALT_DAMAGE_MODIFIER)
+            );
+        }
     }
 }

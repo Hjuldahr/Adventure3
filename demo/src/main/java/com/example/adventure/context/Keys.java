@@ -20,4 +20,7 @@ public abstract class Keys {
     public static final ContextKey<Flag> IS_GLANCING_HIT = ContextKey.of("isGlanceHit", Flag.class);
     public static final ContextKey<Flag> IS_CRITICAL_HEAL = ContextKey.of("isCritHeal", Flag.class);
     public static final ContextKey<Flag> IS_WEAK_HEAL = ContextKey.of("isWeakHeal", Flag.class);
+
+    public static final ContextKey<Float> RECEIVED_DAMAGE_MODIFIER = ContextKey.of("receivedDamageModifier", Float.class);
+    public static final ContextKey<Float> DEALT_DAMAGE_MODIFIER = ContextKey.of("dealtDamageModifier", Float.class);
 }
