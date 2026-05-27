@@ -11,10 +11,11 @@ public class App
 {
     public static void main( String[] args )
     {
-        Entity testA = new Player("A", 100);
-        Entity testB = new NPC("B", 100);
+        Entity testA = new Player("Alphonse", 100);
+        Entity testB = new NPC("Gobbo", 100);
 
         DataRecord attackData = new DataRecord()
+            .set(Keys.ATTACK_NAME, "Mind Bolt")
             .set(Keys.ATTACK_POWER, 5)
             .set(Keys.DAMAGE_TYPE, DamageTypes.PSIONIC)
             .set(Keys.TARGET, testB);

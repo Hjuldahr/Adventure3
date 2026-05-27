@@ -13,10 +13,13 @@ import com.example.adventure.events.EventListener;
 import com.example.adventure.events.EventTypes;
 
 public abstract class Entity {
-    protected final float CRIT_RATE = 0.05f;
+    protected final float CRIT_THRESHOLD = 0.05f;
+    protected final float GLANCE_THRESHOLD = 0.05f;
     protected final float CRIT_BONUS = 1.5f;
+    protected final float GLANCE_PENALTY = 0.5f;
     
     protected String name;
+    protected String pronoun;
     protected int level = 1;
 
     protected Resource hitPoints;
@@ -87,41 +90,60 @@ public abstract class Entity {
         float evasion = target.getEvasion();
         float denominator = accuracy + evasion;
         float hitThreshold = (denominator <= 0) ? 0.5f : (accuracy / denominator);
+        
+        float attack = ThreadLocalRandom.current().nextFloat();
+        float luck = ThreadLocalRandom.current().nextFloat();
 
-        if (ThreadLocalRandom.current().nextFloat() <= hitThreshold) {
-            int damage = params.get(Keys.ATTACK_POWER);
-            
-            if (ThreadLocalRandom.current().nextFloat() <= CRIT_RATE) {
-                damage = (int) Math.ceil(damage * CRIT_BONUS);
-                params.set(Keys.IS_CRITICAL_HIT, null);
-                System.out.println("Critical hit!");
-            } else {
-                System.out.println("Hit!");
-            }
-            
-            params.set(Keys.DAMAGE_TAKEN, damage);
-            target.receiveWeaponDamage(params);
-        } else {
+        boolean isHit = attack <= hitThreshold;
+        boolean isGlance = !isHit && (luck <= GLANCE_THRESHOLD);
+
+        if (!isHit && !isGlance) {
             System.out.println("Miss!");
+            return; // Pure miss. Exit early, allocate nothing, alert nobody.
         }
+
+        DataRecord temp = new DataRecord(params);
+        int damage = temp.get(Keys.ATTACK_POWER);
+
+        if (isHit) {
+            if (luck <= CRIT_THRESHOLD) {
+                damage = (int) Math.ceil(damage * CRIT_BONUS);
+                temp.set(Keys.IS_CRITICAL_HIT);
+                //System.out.printf("%s critically hits with %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
+            } else {
+                //System.out.printf("%s hits with %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
+            }
+        } else { 
+            damage = (int) Math.ceil(damage * GLANCE_PENALTY);
+            temp.set(Keys.IS_GLANCING_HIT);
+            //System.out.printf("%s glancingly hits with %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
+        }
+        
+        temp.set(Keys.DAMAGE_TAKEN, damage);
+        target.receiveWeaponDamage(temp);
     }
 
     public void performSpellAttack(DataRecord params) {
-        Entity target = params.get(Keys.TARGET);
-        DamageTypes damageType = params.get(Keys.DAMAGE_TYPE);
+        DataRecord temp = new DataRecord(params);
+        Entity target = temp.get(Keys.TARGET);
         
-        int damage = params.get(Keys.ATTACK_POWER);
-        damage = (int) Math.ceil(damage * attackModifiers.getModifier(damageType));
-        
-        if (ThreadLocalRandom.current().nextFloat() <= CRIT_RATE) {
+        float luck = ThreadLocalRandom.current().nextFloat();
+        int damage = temp.get(Keys.ATTACK_POWER);
+
+        if (luck <= CRIT_THRESHOLD) {
             damage = (int) Math.ceil(damage * CRIT_BONUS);
-            System.out.println("Critical hit!");
+            temp.set(Keys.IS_CRITICAL_HIT);
+            //System.out.printf("%s critically casts %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
+        } else if (luck >= 1f - GLANCE_THRESHOLD) {
+            damage = (int) Math.ceil(damage * GLANCE_PENALTY);
+            temp.set(Keys.IS_GLANCING_HIT);
+            //System.out.printf("%s barely casts %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
         } else {
-            System.out.println("Hit!");
+            //System.out.printf("%s casts %s against %s!%n", name, temp.get(Keys.ATTACK_NAME), target.name);
         }
         
-        params.set(Keys.DAMAGE_TAKEN, damage);
-        target.receiveSpellDamage(params);
+        temp.set(Keys.DAMAGE_TAKEN, damage);
+        target.receiveSpellDamage(temp);
     }
 
     protected void receiveWeaponDamage(DataRecord params) {
@@ -149,16 +171,40 @@ public abstract class Entity {
         int finalDamage = Math.clamp(Math.round(baseDamage * finalModifier), 1, 9_999);
         params.set(Keys.DAMAGE_TAKEN, finalDamage);
 
-        System.out.printf("%s has taken %s %s damage!\n", name, finalDamage, params.get(Keys.DAMAGE_TYPE));
+        System.out.printf("%s takes %s %s damage!\n", name, finalDamage, params.get(Keys.DAMAGE_TYPE));
 
         eventListener.fire(EventTypes.TAKE_DAMAGE, params);
         hitPoints.change(-finalDamage);
     }
 
     public void performHeal(DataRecord params) {
-        eventListener.fire(EventTypes.DID_HEAL, params);
+        DataRecord temp = new DataRecord(params);
+        Entity target = params.get(Keys.TARGET);
 
-        params.get(Keys.TARGET).receiveHeal(params);
+        float luck = ThreadLocalRandom.current().nextFloat();
+        int healing = temp.get(Keys.HEALING_POWER);
+
+        if (luck <= CRIT_THRESHOLD) {
+            healing = (int) Math.ceil(healing * CRIT_BONUS);
+            temp.set(Keys.IS_CRITICAL_HEAL);
+            System.out.printf("%s casts %s at %s critically healing %s.", 
+                name, temp.get(Keys.ATTACK_NAME), target.name, target.pronoun
+            );
+
+        } else if (luck >= 1f - GLANCE_THRESHOLD) {
+            healing = (int) Math.ceil(healing * GLANCE_PENALTY);
+            temp.set(Keys.IS_WEAK_HEAL);
+            System.out.printf("%s casts %s at %s weakly healing %s.", 
+                name, temp.get(Keys.ATTACK_NAME), target.name, target.pronoun
+            );
+        } else {
+            System.out.printf("%s casts %s at %s healing %s.", 
+                name, temp.get(Keys.ATTACK_NAME), target.name, target.pronoun
+            );
+        }
+
+        temp.set(Keys.HEALING_TAKEN, healing);
+        target.receiveHeal(temp);
     }
 
     public void middleOfTurn() {
