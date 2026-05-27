@@ -19,10 +19,21 @@ public class DataRecord {
         return this; 
     }
 
+    public DataRecord set(ContextKey<Flag> key) {
+        values.put(key, Flag.value);
+        return this; 
+    }
+
+    public <T> DataRecord unset(ContextKey<T> key) {
+        values.remove(key);
+        return this; 
+    }
+
+
     public <T> T get(ContextKey<T> key) {
         Object value = values.get(key);
-        // Returns the value cast to T, or null if not found
-        return (value == null) ? null : key.type().cast(value);
+        if (value == null) return null;
+        return key.type().cast(value);
     }
     
     public boolean has(ContextKey<?> key) {

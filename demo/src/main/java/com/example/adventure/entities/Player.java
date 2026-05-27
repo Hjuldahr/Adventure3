@@ -29,16 +29,17 @@ public class Player extends Entity {
         System.out.printf("Current Exp: %s\n", this.experience);
         System.out.printf("To Next Level: %s\n\n", getLevelThreshold() - this.experience);
 
-        System.out.printf("Accuracy: %s%%\n", this.accuracy);
-        System.out.printf("Evasion: %s%%\n", this.evasion);
-        System.out.printf("Phys Def: %s\n", this.defence);
-        System.out.printf("Magi Def: %s\n\n", this.magicDefence);
+        System.out.printf("Accuracy: %s%%\n", this.accuracy * 100);
+        System.out.printf("Evasion: %s%%\n", this.evasion * 100);
+        System.out.printf("Armour: %s\n", getArmourScore());
 
-        System.out.printf("Brawn: %s\n", this.brawn);
-        System.out.printf("Agility: %s\n", this.agility);
-        System.out.printf("Fortitude: %s\n", this.fortitude);
-        System.out.printf("Charm: %s\n", this.charm);
-        System.out.printf("Intellect: %s\n", this.intellect);
-        System.out.printf("Spirit: %s\n", this.spirit);
+        abilityScores.displayScores();
+    }
+
+    @Override
+    protected int getArmourScore() {
+        // TODO Auto-generated method stub
+        //throw new UnsupportedOperationException("Unimplemented method 'getArmourScore'");
+        return 5;
     }
 }
