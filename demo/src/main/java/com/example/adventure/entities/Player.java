@@ -1,8 +1,7 @@
 package com.example.adventure.entities;
 
 public class Player extends Entity {
-    private final int LEVEL_COST_SCALE = 110;
-    
+    private final int LEVEL_COST_SCALE = 100;
     private int experience;
     
     public Player(String name, Pronouns pronoun, int maxHP) {
