@@ -9,8 +9,8 @@ public class DataRecord {
     public DataRecord() {}
 
     public DataRecord(DataRecord other) {
-        if (other != null && !other.values.isEmpty()) {
-            values.putAll(other.values);
+        if (other != null) {
+            this.values.putAll(other.values);
         }
     }
 
@@ -29,11 +29,11 @@ public class DataRecord {
         return this; 
     }
 
-
+    @SuppressWarnings("unchecked")
     public <T> T get(ContextKey<T> key) {
         Object value = values.get(key);
         if (value == null) return null;
-        return key.type().cast(value);
+        return (T) value;
     }
     
     public boolean has(ContextKey<?> key) {

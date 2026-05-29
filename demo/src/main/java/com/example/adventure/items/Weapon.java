@@ -6,7 +6,6 @@ import com.example.adventure.context.DataRecord;
 public class Weapon extends Equipment {
     private int attackPower = 0;
     private boolean isTwoHanded = false;
-
     private WeaponMasteryTrait weaponMasteryTrait; // added to the attack
 
     public Weapon(String name, int buyCost, int level) {
@@ -15,6 +14,7 @@ public class Weapon extends Equipment {
 
     public Weapon(Weapon other) {
         super(other);
+        this.attackPower = other.attackPower;
         this.isTwoHanded = other.isTwoHanded;
         this.weaponMasteryTrait = other.weaponMasteryTrait;
     }
@@ -39,9 +39,9 @@ public class Weapon extends Equipment {
         return weaponMasteryTrait; 
     }
 
-    public Optional<DataRecord> useWeaponMaster(DataRecord params) {
+    public Optional<DataRecord> useWeaponMastery(DataRecord params) {
         DataRecord temp = new DataRecord(params);
-        if (isMastered) {
+        if (isMastered && weaponMasteryTrait != null) {
             return Optional.of(weaponMasteryTrait.trigger(temp));
         }
         return Optional.empty();

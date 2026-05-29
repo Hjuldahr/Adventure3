@@ -58,4 +58,6 @@ public class Equipment extends Item {
     public int getExperience() {
         return experience;
     }
+
+    
 }
