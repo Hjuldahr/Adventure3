@@ -30,15 +30,15 @@ public class Player extends Entity {
 
         System.out.printf("Accuracy: %s%%\n", this.accuracy * 100);
         System.out.printf("Evasion: %s%%\n", this.evasion * 100);
-        System.out.printf("Armour: %s\n", getArmourScore());
+        System.out.printf("Defence: %s\n", getDefenceScore());
 
         abilityScores.displayScores();
     }
 
     @Override
-    protected int getArmourScore() {
+    protected int getDefenceScore() {
         // TODO Auto-generated method stub
-        //throw new UnsupportedOperationException("Unimplemented method 'getArmourScore'");
+        //throw new UnsupportedOperationException("Unimplemented method 'getDefenceScore'");
         return 5;
     }
 }

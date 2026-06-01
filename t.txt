@@ -135,9 +135,9 @@ public abstract class Spell {
         int raw = Dice.d20();
         int result = raw + caster.getSpellCastingModifier() + caster.getProfiencyBonus();
         
-        int armourClass = target.getArmourClass();
+        int garmentClass = target.getGarmentClass();
         
-        SuccessTypes successType = Success.evaluateSuccess(result, armourClass);
+        SuccessTypes successType = Success.evaluateSuccess(result, garmentClass);
         LuckTypes luckType = Success.evaluateLuck(raw);
 
         if (successType == SuccessTypes.FAILURE || successType == SuccessTypes.CRIT_FAILURE) {

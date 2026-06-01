@@ -77,10 +77,10 @@ public abstract class Entity {
     }
 
     private float getArmourModifier() {
-        return 100f / (100f + getArmourScore());
+        return 100f / (100f + getDefenceBonus());
     }
 
-    protected abstract int getArmourScore();
+    protected abstract int getDefenceBonus();
 
     private float getEvasion() {
         return evasion;

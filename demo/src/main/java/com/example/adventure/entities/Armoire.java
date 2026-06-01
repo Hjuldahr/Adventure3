@@ -3,18 +3,19 @@ package com.example.adventure.entities;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.stream.Stream;
 
-import com.example.adventure.items.Armour;
+import com.example.adventure.items.Garment;
 import com.example.adventure.items.BodyParts;
 import com.example.adventure.items.Item;
 import com.example.adventure.items.Accessory;
 import com.example.adventure.items.Shield;
 import com.example.adventure.items.Weapon;
 
-public class Armoury {
+public class Armoire {
     private Weapon activePrimaryWeapon = null;
     private Weapon activeSecondaryWeapon = null;
-    private Armour activeArmour = null;
+    private Garment activeGarment = null;
     private Shield activeShield = null;
     private EnumMap<BodyParts,Accessory> activeAccessories = new EnumMap<>(BodyParts.class);
 
@@ -38,11 +39,11 @@ public class Armoury {
         activePrimaryWeapon = weapon;
     }
 
-    public void equipArmour(Armour armour) {
-        if (!unstore(armour)) return;
+    public void equipGarment(Garment garment) {
+        if (!unstore(garment)) return;
         
-        unequipArmour();
-        activeArmour = armour;
+        unequipGarment();
+        activeGarment = garment;
     }
 
     public void equipShield(Shield shield) {
@@ -84,10 +85,10 @@ public class Armoury {
         }
     }
 
-    private void unequipArmour() {
-        if (activeArmour == null) return;
-        stored.add(activeArmour);
-        activeArmour = null;
+    private void unequipGarment() {
+        if (activeGarment == null) return;
+        stored.add(activeGarment);
+        activeGarment = null;
     }
 
     private boolean unstore(Item item) {
@@ -104,5 +105,37 @@ public class Armoury {
 
     public boolean bothHandsOccupied() {
         return mainHandOccupied() && (activePrimaryWeapon.getTwoHanded() || offHandOccupied());
+    }
+
+    public boolean isArmoured() {
+        return activeGarment != null || activeShield != null;
+    }
+
+    private int getAccessoryArmouredBonus() {
+        return activeAccessories.values().stream()
+            .mapToInt(Accessory::getArmouredDefenceBonus)
+            .sum();
+    }
+
+    private int getAccessoryUnarmouredBonus() {
+        return activeAccessories.values().stream()
+            .mapToInt(Accessory::getUnarmouredDefenceBonus)
+            .sum();
+    }
+
+    public int getArmouredDefenceBonus() {
+        int armour = activeGarment != null ? activeGarment.getDefenceBonus() : 0;
+        int shield = activeShield != null ? activeShield.getDefenceBonus() : 0;
+        int bonus = getAccessoryArmouredBonus();
+        return armour + shield + bonus;
+    }
+
+    public int getUnarmouredDefenceBonus() {
+        int bonus = getAccessoryUnarmouredBonus();
+        return bonus;
+    }
+
+    public int getDefenceBonus() {
+        return isArmoured() ? getArmouredDefenceBonus() : getUnarmouredDefenceBonus();
     }
 }
