@@ -1,7 +1,13 @@
 package com.example.adventure.entities;
 
+import com.example.adventure.categories.AbilityTypes;
+
 public class Player extends Entity {
-    private final int LEVEL_COST_SCALE = 100;
+    public static final int MIN_HP = 100;
+    public static final int MAX_HP = 1_000;
+    
+    public final int LEVEL_COST_SCALE = 100;
+
     private int experience;
     
     public Player(String name, Pronouns pronoun, int maxHP) {
@@ -30,15 +36,26 @@ public class Player extends Entity {
 
         System.out.printf("Accuracy: %s%%\n", this.accuracy * 100);
         System.out.printf("Evasion: %s%%\n", this.evasion * 100);
-        System.out.printf("Defence: %s\n", getDefenceScore());
+        System.out.printf("Defence: %s\n", getDefenceBonus());
 
         abilityScores.displayScores();
     }
 
+    public int recalculateMaxHP() {
+        // 100 to 1,000 HP
+        int fortitude = abilityScores.getScore(AbilityTypes.FORTITUDE);
+        float range = (float) (MAX_HP - MIN_HP);
+        float rawHP = MIN_HP + (fortitude - 1.0f) * (range / 99.0f);
+        int adjustedHP = Math.round(rawHP / 5.0f) * 5;
+
+        hitPoints.setMaxHP(adjustedHP);
+
+        return adjustedHP;
+    }
+
     @Override
-    protected int getDefenceScore() {
+    protected int getDefenceBonus() {
         // TODO Auto-generated method stub
-        //throw new UnsupportedOperationException("Unimplemented method 'getDefenceScore'");
-        return 5;
+        throw new UnsupportedOperationException("Unimplemented method 'getDefenceBonus'");
     }
 }
