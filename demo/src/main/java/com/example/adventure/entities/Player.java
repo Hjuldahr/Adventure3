@@ -1,6 +1,7 @@
 package com.example.adventure.entities;
 
 import com.example.adventure.categories.AbilityTypes;
+import com.example.adventure.combat.CombatContext;
 
 public class Player extends Entity {
     public static final int MIN_HP = 100;
@@ -57,5 +58,15 @@ public class Player extends Entity {
     protected int getDefenceBonus() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getDefenceBonus'");
+    }
+
+    @Override
+    public void middleOfTurn(CombatContext combatContext) {
+        System.out.println("1. ATTACK");
+        System.out.println("2. MAGIC");
+        System.out.println("3. ITEM");
+        System.out.println("4. STATS");
+
+        int = 
     }
 }

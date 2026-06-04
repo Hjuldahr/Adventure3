@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.example.adventure.categories.AbilityScores;
 import com.example.adventure.categories.DamageModifiers;
 import com.example.adventure.categories.DamageTypes;
+import com.example.adventure.combat.CombatContext;
 import com.example.adventure.context.DataRecord;
 import com.example.adventure.context.Keys;
 import com.example.adventure.effect.ActiveEffects;
@@ -225,10 +226,7 @@ public abstract class Entity {
         target.receiveHeal(temp);
     }
 
-    public void middleOfTurn() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'act'");
-    }
+    public abstract void middleOfTurn(CombatContext combatContext);
 
     public void startOfTurn() {
         magicPoints.change(magicPointRegeneration);
