@@ -20,8 +20,8 @@ public class NPC extends Entity {
     }
 
     @Override
-    public void middleOfTurn(CombatContext combatContext) {
+    public void onTurn(CombatContext combatContext) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'middleOfTurn'");
+        throw new UnsupportedOperationException("Unimplemented method 'onTurn'");
     }
 }

@@ -35,9 +35,19 @@ public class CombatEncounter {
 
     private void encounterTurn(int number) {
         Entity entity = combatContext.get(number);
-        entity.startOfTurn();
-        entity.middleOfTurn(combatContext);
-        entity.endOfTurn();
+
+        if (entity == null || entity.isDefeated()) {
+            combatContext.remove(number);
+            return;
+        }
+
+        entity.beforeTurn();
+
+        if (entity.canAct()) {
+            entity.onTurn(combatContext);
+        }
+
+        entity.afterTurn();
     }
 
     private void endEncounter() {

@@ -1,85 +1,62 @@
 package com.example.adventure.combat;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.example.adventure.combat.CombatContext.CombatEntry;
 import com.example.adventure.entities.Entity;
 
 public class CombatContext {
-    private Map<Integer,Entity> actors = new HashMap<>();
-    private Queue<CombatEntry> order = new LinkedList<>();
+    private HashMap<Integer,Entity> entities = new HashMap<>();
+    private Queue<Integer> order = new LinkedList<>();
     private AtomicInteger lastNumber = new AtomicInteger();
     private boolean isRunning = true;
 
-    public record CombatEntry(int combatNumber, Entity actor) {}
+    public record CombatEntry(int combatNumber, Entity entity) {}
 
     public CombatContext(List<Entity> entities) {
         entities.forEach(this::add);
     }
 
-    public CombatEntry add(Entity entity) {
+    public int add(Entity entity) {
         int number = lastNumber.incrementAndGet();
-        CombatEntry entry = new CombatEntry(number, entity);
-        actors.put(number, entity);
-        order.add(entry);
-        return entry;
+        entities.put(number, entity);
+        order.add(number);
+        return number;
     }
 
-    public Optional<Entity> getByNumber(int number) {
-        return Optional.ofNullable(actors.get(number));
+    public Entity get(int number) {
+        return entities.get(number);
     }
 
-    public List<CombatEntry> getByAllegiance(boolean isEnemy) {
-        return order.stream()
-            .filter(e -> e.actor.isEnemy() == isEnemy)
-            .toList();
+    public HashMap<Integer,Entity> getAll() {
+        return new HashMap<>(this.entities);
     }
 
-    public List<CombatEntry> getByLiving(boolean isAlive) {
-        return order.stream()
-            .filter(e -> e.actor.isAlive() == isAlive)
-            .toList();
+    public void remove(int number) {
+        entities.remove(number);
+        order.remove(number);
     }
 
-    public List<CombatEntry> getAll() {
-        return new ArrayList<>(order);
-    }
-
-    public void removeByNumber(int number) {
-        actors.remove(number);
-        order.removeIf(e -> e.combatNumber == number);
-    }
-
-    public CombatEntry peek() {
+    public int peek() {
         return order.peek();
     }
 
-    public Optional<CombatEntry> next() {
-        while (isRunning) {
-            CombatEntry entry = order.poll();
+    public int next() {
+        int number = order.poll();
+        order.add(number);
+        return number;
+    }
 
-            if (entry == null) return Optional.empty();
+    public void clear() {
+        entities.clear();
+        order.clear();
+    }
 
-            if (!entry.actor.isAlive() && !entry.actor.canRevive()) {
-                removeByNumber(entry.combatNumber);
-                continue;
-            }
-
-            order.add(entry);
-
-            if (entry.actor.canAct()) {
-                return Optional.of(entry);
-            }
-        }
-
-        return Optional.empty();
+    public int size() {
+        return order.size();
     }
 
     public boolean isRunning() {

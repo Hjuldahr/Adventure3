@@ -227,9 +227,9 @@ public abstract class Entity {
         target.receiveHeal(temp);
     }
 
-    public abstract void middleOfTurn(CombatContext combatContext);
+    public abstract void onTurn(CombatContext combatContext);
 
-    public void startOfTurn() {
+    public void beforeTurn() {
         magicPoints.change(magicPointRegeneration);
 
         for (Effect effect : activeEffects.getEffects()) {
@@ -239,6 +239,19 @@ public abstract class Entity {
                 receiveHeal(params);
             }
         }
+    }
+
+    public void afterTurn() {
+        for (Effect effect : activeEffects.getEffects()) {
+            DataRecord params = effect.getParams();
+            
+            if (params.has(Keys.DAMAGE_OVER_TIME)) {
+                applyDamage(params, 1f);
+            }
+        }
+
+        activeEffects.decrementDuration();
+        activeEffects.getExpiredEffects().forEach(this::removeEffect);
     }
 
     public void applyEffect(Effect effect) {
@@ -266,19 +279,6 @@ public abstract class Entity {
         }
     }
 
-    public void endOfTurn() {
-        for (Effect effect : activeEffects.getEffects()) {
-            DataRecord params = effect.getParams();
-            
-            if (params.has(Keys.DAMAGE_OVER_TIME)) {
-                applyDamage(params, 1f);
-            }
-        }
-
-        activeEffects.decrementDuration();
-        activeEffects.getExpiredEffects().forEach(this::removeEffect);
-    }
-
     public void removeEffect(Effect effect) {
         if (!activeEffects.remove(effect)) return;
 
@@ -304,6 +304,10 @@ public abstract class Entity {
 
     public boolean isAlive() {
         return !hitPoints.atMinimum();
+    }
+
+    public boolean isDefeated() {
+        return !isAlive() && !canRevive();
     }
 
     public boolean canAct() {

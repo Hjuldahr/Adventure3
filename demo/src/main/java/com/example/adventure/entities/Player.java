@@ -65,7 +65,7 @@ public class Player extends Entity {
     }
 
     @Override
-    public void middleOfTurn(CombatContext combatContext) {
+    public void onTurn(CombatContext combatContext) {
         if (isStunned || isDowned) {
             System.out.println("You cannot ACT this turn.");
             Terminal.inputNull();
