@@ -2,8 +2,6 @@ package com.example.adventure.categories;
 
 import java.util.EnumMap;
 
-import com.example.adventure.entities.Player;
-
 public class AbilityScores {
     private final int BASE_SCORE = 10;
     private final int MAX_SCORE = 99;

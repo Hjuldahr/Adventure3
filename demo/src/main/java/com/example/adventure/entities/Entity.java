@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.example.adventure.categories.AbilityScores;
 import com.example.adventure.categories.DamageModifiers;
 import com.example.adventure.categories.DamageTypes;
+import com.example.adventure.categories.DefenceBypass;
 import com.example.adventure.combat.CombatContext;
 import com.example.adventure.context.DataRecord;
 import com.example.adventure.context.Keys;
@@ -174,7 +175,7 @@ public abstract class Entity {
     protected void receiveSpellDamage(DataRecord params) {
         DamageTypes damageType = params.get(Keys.DAMAGE_TYPE);
 
-        float armorModifier = damageType.ignoresArmour() ? 1f : getArmourModifier();
+        float armorModifier = damageType.defenceBypass() == DefenceBypass.NONE ? getArmourModifier() : 1f;
         float typeModifier = defenceModifiers.getModifier(damageType);
         
         applyDamage(params, armorModifier * typeModifier);
@@ -297,5 +298,25 @@ public abstract class Entity {
                 params.get(Keys.DEALT_DAMAGE_MODIFIER)
             );
         }
+    }
+
+    public abstract boolean isEnemy();
+
+    public boolean isAlive() {
+        return !hitPoints.atMinimum();
+    }
+
+    public boolean canAct() {
+        return isAlive() && !isStunned();
+    }
+
+    private boolean isStunned() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isStunned'");
+    }
+
+    public boolean canRevive() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'canRevive'");
     }
 }

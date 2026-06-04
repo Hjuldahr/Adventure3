@@ -1,7 +1,9 @@
 package com.example.adventure.entities;
 
 import com.example.adventure.categories.AbilityTypes;
+import com.example.adventure.categories.PlayerTurnActions;
 import com.example.adventure.combat.CombatContext;
+import com.example.adventure.utilities.Terminal;
 
 public class Player extends Entity {
     public static final int MIN_HP = 100;
@@ -10,6 +12,8 @@ public class Player extends Entity {
     public final int LEVEL_COST_SCALE = 100;
 
     private int experience;
+    private boolean isStunned;
+    private boolean isDowned;
     
     public Player(String name, Pronouns pronoun, int maxHP) {
         super(name, pronoun, maxHP);
@@ -62,11 +66,50 @@ public class Player extends Entity {
 
     @Override
     public void middleOfTurn(CombatContext combatContext) {
-        System.out.println("1. ATTACK");
-        System.out.println("2. MAGIC");
-        System.out.println("3. ITEM");
-        System.out.println("4. STATS");
+        if (isStunned || isDowned) {
+            System.out.println("You cannot ACT this turn.");
+            Terminal.inputNull();
+            return;
+        }
+        
+        boolean turnOver = false;
+        PlayerTurnActions[] options = PlayerTurnActions.values();
 
-        int = 
+        while (!turnOver) {
+            for (int i = 0; i < options.length; i++) {
+                System.out.printf("[%d] %s\n", i+1, options[i].name());
+            }
+
+            PlayerTurnActions option = Terminal.inputOptions("> ", options);
+
+            turnOver = switch (option) {
+                case ATTACK -> playerAttack(combatContext):
+                case MAGIC -> playerMagic(combatContext):  
+                case ITEM -> {
+                    playerItem();
+                    yield false;
+                }:   
+                case STATS -> {
+                    playerStats();
+                    yield false;
+                }:
+            };
+        }
+    }
+
+    public boolean playerAttack(CombatContext combatContext) {
+
+    }
+
+    public boolean playerMagic(CombatContext combatContext) {
+        
+    }
+
+    public boolean playerItem(CombatContext combatContext) {
+        
+    }
+
+    public void playerStats() {
+
     }
 }

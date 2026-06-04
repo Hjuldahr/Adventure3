@@ -1,5 +1,7 @@
 package com.example.adventure.entities;
 
+import com.example.adventure.combat.CombatContext;
+
 public class NPC extends Entity {
     protected int defenceScore = 10; // TEMP
 
@@ -12,7 +14,14 @@ public class NPC extends Entity {
     }
 
     @Override
-    protected int getDefenceScore() {
-        return defenceScore;
+    protected int getDefenceBonus() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDefenceBonus'");
+    }
+
+    @Override
+    public void middleOfTurn(CombatContext combatContext) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'middleOfTurn'");
     }
 }

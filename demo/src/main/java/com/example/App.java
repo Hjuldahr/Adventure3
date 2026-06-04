@@ -1,17 +1,13 @@
 package com.example;
 
-import com.example.adventure.categories.DamageTypes;
-import com.example.adventure.context.DataRecord;
-import com.example.adventure.context.Keys;
-import com.example.adventure.entities.Entity;
-import com.example.adventure.entities.NPC;
-import com.example.adventure.entities.Player;
-import com.example.adventure.entities.Pronouns;
+import com.example.adventure.categories.PlayerTurnActions;
+import com.example.adventure.utilities.Terminal;
 
 public class App 
 {
     public static void main( String[] args )
     {
+        /* 
         Entity testA = new Player("Alphonse", Pronouns.MALE, 100);
         Entity testB = new NPC("Gobbi", Pronouns.XENO, 100);
 
@@ -22,5 +18,8 @@ public class App
             .set(Keys.TARGET, testB);
 
         testA.performSpellAttack(attackData);
+        */
+        PlayerTurnActions result = Terminal.inputOptions("> ", PlayerTurnActions.class);
+        System.out.println(result);
     }
 }

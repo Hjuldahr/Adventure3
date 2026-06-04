@@ -3,8 +3,6 @@ package com.example.adventure.entities;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.stream.Stream;
-
 import com.example.adventure.items.Garment;
 import com.example.adventure.items.BodyParts;
 import com.example.adventure.items.Item;
